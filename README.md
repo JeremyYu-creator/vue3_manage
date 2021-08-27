@@ -1,5 +1,5 @@
 # vue3_try
-
+a project for practice
 ## Project setup
 ```
 npm install
