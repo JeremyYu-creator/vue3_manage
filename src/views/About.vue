@@ -15,8 +15,8 @@ export default defineComponent({
   setup() {
     const person = reactive({ name: "张三", age: 20 });
     const fatherName = ref("父组件传值");
-    console.log(fatherName.value);
-    console.log(person);
+    // console.log(fatherName.value);
+    // console.log(person);
     provide("fatherName", fatherName.value);
     setTimeout(() => {
       person.age++;

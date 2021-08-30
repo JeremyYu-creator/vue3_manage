@@ -1,6 +1,7 @@
 <template>
   <div>{{ name }}</div>
   <div>{{ age }}</div>
+
   <div class="showChart">
     <div id="container"></div>
   </div>
@@ -9,7 +10,6 @@
 <script lang="ts">
 import { defineComponent, reactive, toRefs, onMounted } from "vue";
 import { Chart } from "@antv/g2";
-
 export default defineComponent({
   name: "checkRoute",
   setup() {
