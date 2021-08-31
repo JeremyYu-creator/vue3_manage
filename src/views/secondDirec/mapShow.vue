@@ -52,8 +52,8 @@ export default {
       },
     }).then((AMap)=>{
       const map = new AMap.Map('map', {
-        zoom:12,                                        //级别
-        center: [114.06667,22.61667],                 //中心点坐标
+        zoom:40,                                        //级别
+        center: [116.483989,39.924987],                 //中心点坐标
         // 上海市区经纬度:(121.43333,34.50000)
         viewMode:'3D'                                   //使用3D视图
       });
