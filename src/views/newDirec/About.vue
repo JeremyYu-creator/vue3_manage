@@ -1,15 +1,15 @@
 <template>
   <div class="about">
     <Home></Home>
-    <h1>{{ name }}</h1>
-    <div>{{ age }}</div>
-    <div @click="showName()">点击我</div>
+    <h1 class="title">{{ name }}</h1>
+    <div class="title">{{ age }}</div>
+    <div class="title" @click="showName()">点击我</div>
   </div>
 </template>
 <script lang="ts">
 import { defineComponent, reactive, toRefs, watch, provide, ref } from "vue";
 // import Home from "../../src/views/Home.vue";
-import Home from "@/views/Home.vue";
+import Home from "@/views/newDirec/Home.vue";
 export default defineComponent({
   components: { Home },
   setup() {
@@ -43,3 +43,7 @@ export default defineComponent({
   },
 });
 </script>
+<style lang="stylus" scoped>
+.title
+  text-align center
+</style>

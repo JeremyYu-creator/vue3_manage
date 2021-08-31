@@ -5,7 +5,7 @@
       <el-radio-button :label="true">收起</el-radio-button>
     </el-radio-group>
     <el-menu
-      default-active="1-4-1"
+      default-active="1-3"
       class="el-menu-vertical-demo"
       @open="handleOpen"
       @close="handleClose"
@@ -17,22 +17,23 @@
           <span>导航一</span>
         </template>
         <el-menu-item-group>
-          <template #title>分组一</template>
+          <template #title>第一分组</template>
           <el-menu-item index="1-1" @click="toAbout">About</el-menu-item>
-          <el-menu-item index="1-2">HelloWorld</el-menu-item>
+          <el-menu-item index="1-2" @click="toHelloWorld"
+            >HelloWorld</el-menu-item
+          >
         </el-menu-item-group>
-        <el-menu-item-group title="分组2">
-          <el-menu-item index="1-3">选项3</el-menu-item>
+        <el-menu-item-group title="第二分组">
+          <el-menu-item index="1-3" @click="toCheckRoute">CheckRoute</el-menu-item>
         </el-menu-item-group>
-        <el-sub-menu index="1-4">
-          <template #title>选项4</template>
-          <el-menu-item index="1-4-1">选项1</el-menu-item>
-        </el-sub-menu>
       </el-sub-menu>
-      <el-menu-item index="2">
-        <i class="el-icon-menu"></i>
-        <template #title>导航二</template>
-      </el-menu-item>
+      <el-sub-menu index="2">
+        <template #title>
+          <i class="el-icon-menu"></i>
+          <span>导航二</span>
+        </template>
+        <el-menu-item index="2-1" @click="toMap">查看地图</el-menu-item>
+      </el-sub-menu>
       <el-menu-item index="3" disabled>
         <i class="el-icon-document"></i>
         <template #title>导航三</template>
@@ -81,6 +82,15 @@ export default {
     const toAbout = () => {
       router.push({ name: "About", query: { id: 123 } });
     };
+    const toHelloWorld = () => {
+      router.push({ name: "HelloWorld", query: { id: 456 } });
+    };
+    const toCheckRoute = () => {
+      router.push({ name: "CheckRoute", query: { id: 789 } });
+    };
+    const toMap = () => {
+      router.push({name: "MapShow", query: {date: "k"}})
+    }
     return {
       index,
       label,
@@ -88,6 +98,9 @@ export default {
       handleOpen,
       handleClose,
       toAbout,
+      toHelloWorld,
+      toCheckRoute,
+      toMap,
     };
   },
 };
@@ -96,6 +109,7 @@ export default {
 <style lang="stylus" scoped>
 .aside-menu
   width 300px
+  margin-top 20px
 .router-style
   margin-left 200px
 </style>

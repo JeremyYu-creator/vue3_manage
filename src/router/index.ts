@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
-import Home from "../views/Home.vue";
+import Home from "../views/newDirec/Home.vue";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -18,22 +18,27 @@ const routes: Array<RouteRecordRaw> = [
         // this generates a separate chunk (about.[hash].js) for this route
         // which is lazy-loaded when the route is visited.
         component: () =>
-          import(/* webpackChunkName: "about" */ "../views/About.vue"),
+          import(/* webpackChunkName: "about" */ "../views/newDirec/About.vue"),
       },
       {
         path: "/checkRoute",
-        name: "checkRoute",
-        component: () => import("../views/checkRoute.vue"),
+        name: "CheckRoute",
+        component: () => import("../views/newDirec/checkRoute.vue"),
       },
       {
         path: "/home",
-        name: "home",
-        component: () => import("../views/Home.vue"),
+        name: "Home",
+        component: () => import("../views/newDirec/Home.vue"),
       },
       {
         path: "/helloWorld",
-        name: "helloWorld",
+        name: "HelloWorld",
         component: () => import("../components/HelloWorld.vue"),
+      },
+      {
+        path: "/mapShow",
+        name: "MapShow",
+        component: () => import("../views/secondDirec/mapShow.vue"),
       },
     ],
   },

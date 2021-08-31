@@ -1,6 +1,6 @@
 <template>
-  <div>{{ name }}</div>
-  <div>{{ age }}</div>
+  <div class="title">{{ name }}</div>
+  <div class="title">{{ age }}</div>
 
   <div class="showChart">
     <div id="container"></div>
@@ -52,4 +52,6 @@ export default defineComponent({
 .showChart
     width 800px
     margin 20px auto 0
+.title
+  text-align center
 </style>

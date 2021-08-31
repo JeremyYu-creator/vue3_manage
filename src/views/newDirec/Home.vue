@@ -1,7 +1,7 @@
 <template>
   <div class="home">
     <div class="img-style">
-      <img alt="Vue logo" src="../assets/logo.png" />
+      <img alt="Vue logo" src="../../assets/logo.png" />
     </div>
     <div class="father-show">{{ fatherName }}</div>
     <div class="table">

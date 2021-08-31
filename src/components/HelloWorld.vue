@@ -1,6 +1,6 @@
 <template>
   <div class="hello">
-    <h1 @click="dialogVisible = true">{{ name }}</h1>
+    <h1 @click="dialogVisible = true" class="touch">{{ name }}</h1>
     <el-popover
       placement="top-start"
       :width="200"
@@ -47,7 +47,7 @@ export default defineComponent({
     );
     const handleClose = function () {
       dialogVisible.value = false;
-      ElMessage.error("点击了");
+      ElMessage.success("点击了");
     };
     return {
       name,
@@ -61,7 +61,7 @@ export default defineComponent({
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
+<style lang="stylus" scoped>
 h3 {
   margin: 40px 0 0;
 }
@@ -76,4 +76,10 @@ li {
 a {
   color: #42b983;
 }
+.hello
+  display flex
+  justify-content space-around
+  align-items center
+  .touch
+    cursor pointer
 </style>
