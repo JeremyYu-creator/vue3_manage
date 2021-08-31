@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory, RouteRecordRaw } from "vue-router";
-import Home from "../views/newDirec/Home.vue";
+// import Home from "../views/newDirec/Home.vue";
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -8,8 +8,7 @@ const routes: Array<RouteRecordRaw> = [
     children: [
       {
         path: "/",
-        name: "Home",
-        component: Home,
+        redirect: "/About",
       },
       {
         path: "/about",
@@ -39,6 +38,20 @@ const routes: Array<RouteRecordRaw> = [
         path: "/mapShow",
         name: "MapShow",
         component: () => import("../views/secondDirec/mapShow.vue"),
+      },
+      {
+        path: "/toFly",
+        name: "ToFly",
+        component: () => import("../views/secondDirec/toFly.vue"),
+      },
+      {
+        path: "/404",
+        name: "404",
+        component: () => import("../views/secondDirec/error.vue"),
+      },
+      {
+        path: "/:pathMatch(.*)",
+        redirect: "/404",
       },
     ],
   },

@@ -5,7 +5,7 @@
       <el-radio-button :label="true">收起</el-radio-button>
     </el-radio-group>
     <el-menu
-      default-active="1-3"
+      default-active="1-1"
       class="el-menu-vertical-demo"
       @open="handleOpen"
       @close="handleClose"
@@ -38,10 +38,13 @@
         <i class="el-icon-document"></i>
         <template #title>导航三</template>
       </el-menu-item>
-      <el-menu-item index="4">
-        <i class="el-icon-setting"></i>
-        <template #title>导航四</template>
-      </el-menu-item>
+      <el-sub-menu index="4">
+        <template #title>
+          <i class="el-icon-setting"></i>
+          <span>导航四</span>
+        </template>
+        <el-menu-item index="4-1" @click="toFly">查看动态页</el-menu-item>
+      </el-sub-menu>
     </el-menu>
   </div>
   <!--  <div class="router-style">-->
@@ -80,7 +83,7 @@ export default {
     //   }
     // ]
     const toAbout = () => {
-      router.push({ name: "About", query: { id: 123 } });
+      router.push({ name: "About" });
     };
     const toHelloWorld = () => {
       router.push({ name: "HelloWorld", query: { id: 456 } });
@@ -90,6 +93,9 @@ export default {
     };
     const toMap = () => {
       router.push({name: "MapShow", query: {date: "k"}})
+    }
+    const toFly = () => {
+      router.push({name: "ToFly"})
     }
     return {
       index,
@@ -101,6 +107,7 @@ export default {
       toHelloWorld,
       toCheckRoute,
       toMap,
+      toFly,
     };
   },
 };
