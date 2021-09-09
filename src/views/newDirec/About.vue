@@ -1,6 +1,12 @@
 <template>
   <div class="about">
-    <Home></Home>
+    <div class="btn-combine">
+      <el-button @click="controllTable">{{
+        isShow ? "收起" : "展开"
+      }}</el-button>
+      <el-button>筛选(未完成)</el-button>
+    </div>
+    <Home v-show="isShow"></Home>
     <h1 class="title">{{ name }}</h1>
     <div class="title">{{ age }}</div>
     <div class="title" @click="showName()">点击我</div>
@@ -15,6 +21,10 @@ export default defineComponent({
   setup() {
     const person = reactive({ name: "张三", age: 20 });
     const fatherName = ref("父组件传值");
+    const isShow = ref(true);
+    const controllTable = () => {
+      isShow.value = !isShow.value;
+    };
     // console.log(fatherName.value);
     // console.log(person);
     provide("fatherName", fatherName.value);
@@ -39,11 +49,17 @@ export default defineComponent({
       ...toRefs(person),
       showName,
       fatherName,
+      isShow,
+      controllTable,
     };
   },
 });
 </script>
 <style lang="stylus" scoped>
-.title
-  text-align center
+.about
+  .btn-combine
+    display flex
+    justify-content flex-end
+  .title
+    text-align center
 </style>

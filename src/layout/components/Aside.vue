@@ -5,7 +5,6 @@
       <el-radio-button :label="true">收起</el-radio-button>
     </el-radio-group>
     <el-menu
-      default-active="1-1"
       class="el-menu-vertical-demo"
       @open="handleOpen"
       @close="handleClose"
@@ -60,7 +59,7 @@ export default {
   setup() {
     const index = ref(0);
     const label = ref(false);
-    const isCollapse = ref(false);
+    const isCollapse = ref(true);
     const handleOpen = function (key: any, keyPath: any) {
       console.log(key, keyPath);
     };
