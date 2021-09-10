@@ -1,21 +1,5 @@
 <template>
   <div class="container">
-    <!--    <transition name="el-zoom-in-center">-->
-    <!--      &lt;!&ndash;    <GoogleMap&ndash;&gt;-->
-    <!--      &lt;!&ndash;      api-key="AIzaSyB2MdwMkMqH3_th7eNV_nSeAozA86VeM9A"&ndash;&gt;-->
-    <!--      &lt;!&ndash;      style="width: 100%; height: 500px"&ndash;&gt;-->
-    <!--      &lt;!&ndash;      :center="center"&ndash;&gt;-->
-    <!--      &lt;!&ndash;      :zoom="15"&ndash;&gt;-->
-    <!--      &lt;!&ndash;    ></GoogleMap>&ndash;&gt;-->
-    <!--      &lt;!&ndash;    <Marker :options="{position: center}"></Marker>&ndash;&gt;-->
-    <!--      &lt;!&ndash;    <div id="container"></div>&ndash;&gt;-->
-    <!--      <img-->
-    <!--        src="../../../src/assets/none.jpeg"-->
-    <!--        class="img-style"-->
-    <!--        v-show="show"-->
-    <!--      />-->
-    <!--    </transition>-->
-    <!--    <div class="text">暂无数据</div>-->
     <div class="show-predict">
       <el-button type="primary" v-if="nowTag" @click="showHidden(1)"
         >显示实时天气</el-button
@@ -23,10 +7,15 @@
       <el-button type="success" v-if="futureTag" @click="showHidden(2)"
         >显示未来一周天气预报</el-button
       >
+      <el-button type="primary" v-if="searchCityTag" @click="showHidden(3)"
+        >显示搜索城市框</el-button
+      >
+      <el-button type="success" v-if="tagPlace" @click="showHidden(4)"
+        >显示搜索具体位置</el-button
+      >
     </div>
     <div id="map" style="width: 100%; height: 98%"></div>
     <div v-loading="loading" class="loading-style" v-if="tag">
-      <!--      <transition name="el-zoom-in-center">-->
       <div class="info">
         <div class="title">
           实时天气
@@ -44,7 +33,6 @@
         <div class="content">风力：{{ getInfo.windPower }}</div>
         <div class="content">当前更新日期：{{ getInfo.reportTime }}</div>
       </div>
-      <!--      </transition>-->
     </div>
     <div class="forecast" v-loading="futureLoading" v-if="tagFuture">
       <div class="bgc">
@@ -79,15 +67,32 @@
         </div>
       </div>
     </div>
-    <div class="search">
+    <div class="search" v-loading="loading" v-if="tagSearchCity">
       <div class="block">
+        <span class="cityName">请输入城市名字</span>
         <div class="input-style">
           <el-input v-model="cityName"></el-input>
         </div>
-        <span class="cityName">请输入城市名字</span>
+        <div class="close">
+          <i class="el-icon-circle-close" @click="closeWeather(3)"></i>
+        </div>
       </div>
       <div class="btn">
         <el-button type="primary" size="mini" @click="jumpTo">确定</el-button>
+      </div>
+    </div>
+    <div class="searchPlace" v-if="placeTag">
+      <div class="title">
+        <div class="close">
+          搜索位置
+        </div>
+        <i class="el-icon-circle-close" @click="closeWeather(4)"></i>
+      </div>
+      <div class="block-place">
+        <div class="input-place">
+          <el-input v-model="aimPlace"></el-input>
+        </div>
+        <el-button @click="searchPlace" type="primary" plain>搜索</el-button>
       </div>
     </div>
   </div>
@@ -101,23 +106,17 @@ import { ElMessage } from "element-plus";
 
 export default {
   name: "mapShow",
-  // components: {
-  //   GoogleMap,
-  //   Marker,
-  // },
   setup() {
-    // const center = { lat: 40.689247, lng: -74.044502 };
-    // onMounted(() => {
-    //   const map = new BMap.Map('container')
-    //   const point = new BMap.Point(116.404, 39.915)
-    //   map.centerAndZoom(point, 15)
-    //   map.enableScrollWheelZoom(true)
-    // })
     onBeforeMount(() => {
       AMapLoader.load({
         key: "41417da0b45d919952ca225160450a43", // 申请好的Web端开发者Key，首次调用 load 时必填
         version: "1.4.15", // 指定要加载的 JSAPI 的版本，缺省时默认为 1.4.15
-        plugins: ["AMap.Weather"], // 需要使用的的插件列表，如比例尺'AMap.Scale'等
+        plugins: [
+          "AMap.Weather",
+          "AMap.ToolBar",
+          "AMap.PlaceSearch",
+          "AMap.Marker",
+        ], // 需要使用的的插件列表，如比例尺'AMap.Scale'等
         AMapUI: {
           // 是否加载 AMapUI，缺省不加载
           version: "1.1", // AMapUI 缺省 1.1
@@ -135,6 +134,8 @@ export default {
             // 上海市区经纬度:(121.43333,34.50000)
             viewMode: "3D", //使用3D视图
           });
+          const tool = new AMap.ToolBar();
+          map.addControl(tool);
           const trafficLayer = new AMap.TileLayer.Traffic({
             // 显示当前路段的交通情况
             zIndex: 10,
@@ -168,12 +169,12 @@ export default {
     });
     let getInfo = ref({}); // 获取当前城市当天天气信息
     let loading = ref(true); // 第一个模块的loading
-    let tag = ref(true); // 第一个模块的隐藏
+    let tag = ref(false); // 第一个模块的隐藏
     let forecastArr = ref([]); // 第二个模块的渲染数组
     let futureLoading = ref(true); // 第二个模块的loading
     let updateTime = ref("");
-    let nowTag = ref(false);
-    let futureTag = ref(false);
+    let nowTag = ref(true);
+    let futureTag = ref(true);
     let cityName = ref("");
     const mapLabels = reactive([
       "",
@@ -185,32 +186,54 @@ export default {
       "星期六",
       "星期日",
     ]);
-    const show = ref(false);
-    let tagFuture = ref(true);
+    const show = ref(true);
+    let tagFuture = ref(false);
     const closeWeather = (index) => {
-      // index === 1 ? (tag.value = false) : (tagFuture.value = false);
-      if (index === 1) {
-        tag.value = false;
-        nowTag.value = true;
-      } else {
-        tagFuture.value = false;
-        futureTag.value = true;
-      }
-    };
-    const showHidden = (index) => {
+      // 关闭选择页
       if (index === 1) {
         tag.value = true;
         nowTag.value = false;
-      } else {
+      } else if (index === 2) {
         tagFuture.value = true;
         futureTag.value = false;
+      } else if (index === 3) {
+        tagSearchCity.value = false;
+        searchCityTag.value = true;
+      } else if (index === 4) {
+        tagPlace.value = true;
+        placeTag.value = false;
       }
     };
+    const showHidden = (index) => {
+      // 显示btn进行控制
+      if (index === 1) {
+        tag.value = true;
+        nowTag.value = false;
+      } else if (index === 2) {
+        tagFuture.value = true;
+        futureTag.value = false;
+      } else if (index === 3) {
+        tagSearchCity.value = true;
+        searchCityTag.value = false;
+      } else if (index === 4) {
+        tagPlace.value = false;
+        placeTag.value = true;
+      }
+    };
+    let tagSearchCity = ref(false);
+    let searchCityTag = ref(true);
+    let placeTag = ref(false);
+    let tagPlace = ref(true);
     const jumpTo = () => {
       AMapLoader.load({
         key: "41417da0b45d919952ca225160450a43", // 申请好的Web端开发者Key，首次调用 load 时必填
         version: "1.4.15", // 指定要加载的 JSAPI 的版本，缺省时默认为 1.4.15
-        plugins: ["AMap.Weather"], // 需要使用的的插件列表，如比例尺'AMap.Scale'等
+        plugins: [
+          "AMap.Weather",
+          "AMap.ToolBar",
+          "AMap.PlaceSearch",
+          "AMap.Marker",
+        ], // 需要使用的的插件列表，如比例尺'AMap.Scale'等
         AMapUI: {
           // 是否加载 AMapUI，缺省不加载
           version: "1.1", // AMapUI 缺省 1.1
@@ -228,12 +251,14 @@ export default {
             // 上海市区经纬度:(121.43333,34.50000)
             viewMode: "3D", //使用3D视图
           });
+          const tool = new AMap.ToolBar();
+          map.addControl(tool);
           const trafficLayer = new AMap.TileLayer.Traffic({
             // 显示当前路段的交通情况
             zIndex: 10,
           });
           map.add(trafficLayer); //添加图层到地图
-          // AMap.plugins("AMap.Weather", function() {
+          // AMap.plugins("AMap.Weather", function()
           const weather = new AMap.Weather();
           weather.getLive(cityName.value, function (err, data) {
             // 获取该城市的当前天气情况
@@ -250,15 +275,111 @@ export default {
             futureLoading.value = false;
           });
           if (!cityName.value) {
-            cityName.value = "北京市"
+            cityName.value = "北京市";
           }
-          map.setCity(cityName.value)
-          ElMessage.success(`已跳转到${cityName.value}`)
+          map.setCity(cityName.value);
+          ElMessage.success(`已跳转到${cityName.value}`);
         })
         .catch((e) => {
           console.log(e);
         });
-    }
+    };
+    const searchPlace = () => {
+      AMapLoader.load({
+        key: "41417da0b45d919952ca225160450a43", // 申请好的Web端开发者Key，首次调用 load 时必填
+        version: "1.4.15", // 指定要加载的 JSAPI 的版本，缺省时默认为 1.4.15
+        plugins: [
+          "AMap.Weather",
+          "AMap.ToolBar",
+          "AMap.PlaceSearch",
+          "AMap.Marker",
+          // "AMap.infoWindow",
+        ], // 需要使用的的插件列表，如比例尺'AMap.Scale'等
+        AMapUI: {
+          // 是否加载 AMapUI，缺省不加载
+          version: "1.1", // AMapUI 缺省 1.1
+          plugins: [], // 需要加载的 AMapUI ui插件
+        },
+        Loca: {
+          // 是否加载 Loca， 缺省不加载
+          version: "1.3.2", // Loca 版本，缺省 1.3.2
+        },
+      })
+        .then((AMap) => {
+          const map = new AMap.Map("map", {
+            zoom: 15, //级别
+            center: [116.4929, 39.942], //中心点坐标: 这里可以写成动态获取坐标吗？小程序方面需要获取用户允许才可以拿到位置
+            // 上海市区经纬度:(121.43333,34.50000)
+            viewMode: "3D", //使用3D视图
+          });
+          const tool = new AMap.ToolBar();
+          map.addControl(tool);
+          const trafficLayer = new AMap.TileLayer.Traffic({
+            // 显示当前路段的交通情况
+            zIndex: 10,
+          });
+          map.add(trafficLayer); //添加图层到地图
+          // AMap.plugins("AMap.Weather", function() {
+          // const weather = new AMap.Weather();
+          // weather.getLive(cityName.value, function (err, data) {
+          //   // 获取该城市的当前天气情况
+          //   console.log(err, data);
+          //   getInfo.value = data;
+          //   loading.value = false;
+          //   console.log(getInfo.value);
+          // });
+          // weather.getForecast(cityName.value, function (err, data) {
+          //   // 获取该城市未来的天气状况
+          //   console.log(err, data);
+          //   forecastArr.value = data.forecasts;
+          //   updateTime.value = data.reportTime;
+          //   futureLoading.value = false;
+          // });
+          const placeSearch = new AMap.PlaceSearch({
+            map: map,
+            city: cityName.value,
+            // citylimit: true, //是否强制限制在设置的城市内搜索
+            pageSize: 50, // 每页限制多少条数(目前是这样：返回数据只能是1页，但是1页里的条数可以设置)
+            extensions: "base", //返回基本地址信息
+          });
+          placeSearch.search(aimPlace.value, function (status, result) {
+            // console.log(aimPlace.value)
+            console.log(result);
+            const pois = result.poiList.pois;
+            for (let i = 0; i < pois.length; i++) {
+              const poi = pois[i];
+              const marker = [];
+              marker[i] = new AMap.Marker({
+                position: poi.location,
+                title: poi.name,
+              });
+              map.add(marker[i]);
+              // const infoWindow = new AMap.infoWindow({
+              //   autoMove: true,
+              //   offset: {
+              //     x: 0,
+              //     y: -30,
+              //   },
+              // });
+              // const createContent = (poi) => {
+              //   const s = [];
+              //   s.push("<b>名称：" + poi.name+"</b>");
+              //   s.push("地址：" + poi.address);
+              //   s.push("电话：" + poi.tel);
+              //   s.push("类型：" + poi.type);
+              //   return s.join("<br>");
+              // }
+              // map.setCenter(marker.getPostion())
+              // infoWindow.setContent(createContent(poi))
+              // infoWindow.open(map,marker.getPosition())
+            }
+            map.setFitView();
+          });
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    };
     onMounted(() => {
       // debugger
       show.value = !show.value;
@@ -267,6 +388,7 @@ export default {
     let showData = () => {
       console.log(getInfo);
     };
+    let aimPlace = ref("");
     return {
       // center,
       show,
@@ -285,6 +407,12 @@ export default {
       showHidden,
       cityName,
       jumpTo,
+      tagSearchCity,
+      searchCityTag,
+      searchPlace,
+      aimPlace,
+      placeTag,
+      tagPlace,
     };
   },
 };
@@ -405,8 +533,36 @@ export default {
         width 10rem
       .cityName
         font-size 0.8rem
+      .close
+        cursor pointer
     .btn
       display flex
       justify-content flex-end
       margin 1rem
+  .searchPlace
+    position absolute
+    top 55%
+    right 5%
+    background #fff
+    width 20rem
+    height 7rem
+    padding-top 0.5rem
+    .title
+      border-bottom 0.1rem solid black
+      color #625b57
+      // text-align center
+      display flex
+      justify-content space-between
+      align-items center
+      margin 0.5rem
+      padding-bottom 0.5rem
+      .close
+        padding-left 1.5rem
+    .block-place
+      display flex
+      align-items center
+      justify-content space-around
+      padding 1rem
+      .input-place
+        width 10rem
 </style>
