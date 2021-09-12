@@ -1,16 +1,32 @@
 <template>
   <div class="container">
     <div class="show-predict">
-      <el-button type="primary" v-if="nowTag" @click="showHidden(1)"
+      <el-button
+        type="primary"
+        v-if="nowTag"
+        @click="showHidden(1)"
+        v-loading="loading"
         >显示实时天气</el-button
       >
-      <el-button type="success" v-if="futureTag" @click="showHidden(2)"
+      <el-button
+        type="success"
+        v-if="futureTag"
+        @click="showHidden(2)"
+        v-loading="loading"
         >显示未来一周天气预报</el-button
       >
-      <el-button type="primary" v-if="searchCityTag" @click="showHidden(3)"
+      <el-button
+        type="primary"
+        v-if="searchCityTag"
+        @click="showHidden(3)"
+        v-loading="loading"
         >显示搜索城市框</el-button
       >
-      <el-button type="success" v-if="tagPlace" @click="showHidden(4)"
+      <el-button
+        type="success"
+        v-if="tagPlace"
+        @click="showHidden(4)"
+        v-loading="loading"
         >显示搜索具体位置</el-button
       >
     </div>
@@ -83,18 +99,17 @@
     </div>
     <div class="searchPlace" v-if="placeTag">
       <div class="title">
-        <div class="close">
-          搜索位置
-        </div>
+        <div class="close">搜索位置</div>
         <i class="el-icon-circle-close" @click="closeWeather(4)"></i>
       </div>
       <div class="block-place">
         <div class="input-place">
-          <el-input v-model="aimPlace"></el-input>
+          <el-input v-model="aimPlace" id="tipinput"></el-input>
         </div>
         <el-button @click="searchPlace" type="primary" plain>搜索</el-button>
       </div>
     </div>
+    <div class="route">规划路线</div>
   </div>
 </template>
 
@@ -191,11 +206,11 @@ export default {
     const closeWeather = (index) => {
       // 关闭选择页
       if (index === 1) {
-        tag.value = true;
-        nowTag.value = false;
+        tag.value = false;
+        nowTag.value = true;
       } else if (index === 2) {
-        tagFuture.value = true;
-        futureTag.value = false;
+        tagFuture.value = false;
+        futureTag.value = true;
       } else if (index === 3) {
         tagSearchCity.value = false;
         searchCityTag.value = true;
@@ -293,6 +308,7 @@ export default {
           "AMap.ToolBar",
           "AMap.PlaceSearch",
           "AMap.Marker",
+          "AMap.Autocomplete",
           // "AMap.infoWindow",
         ], // 需要使用的的插件列表，如比例尺'AMap.Scale'等
         AMapUI: {
@@ -339,9 +355,13 @@ export default {
             map: map,
             city: cityName.value,
             // citylimit: true, //是否强制限制在设置的城市内搜索
-            pageSize: 50, // 每页限制多少条数(目前是这样：返回数据只能是1页，但是1页里的条数可以设置)
+            pageSize: 20, // 每页限制多少条数(目前是这样：返回数据只能是1页，但是1页里的条数可以设置)
             extensions: "base", //返回基本地址信息
           });
+          // const auto = new AMap.Autocomplete({
+          //   input: "tipinput",
+          // });
+          // auto;
           placeSearch.search(aimPlace.value, function (status, result) {
             // console.log(aimPlace.value)
             console.log(result);
@@ -545,7 +565,7 @@ export default {
     right 5%
     background #fff
     width 20rem
-    height 7rem
+    height 8rem
     padding-top 0.5rem
     .title
       border-bottom 0.1rem solid black
