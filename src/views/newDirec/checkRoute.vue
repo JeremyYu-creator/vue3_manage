@@ -14,12 +14,16 @@
     <!--    </el-tabs>-->
     <!--  </div>-->
     <div class="titleAll">
-      <div @click="goTo(1)" class="title-item">柱状图比较</div>
-      <div @click="goTo(2)" class="title-item">折线图比较</div>
-      <div @click="goTo(3)" class="title-item">地图比较</div>
-      <div @click="goTo(4)" class="title-item">饼图比较</div>
+      <div v-for="item in editNames">
+        <div
+          @click="goTo(item.name)"
+          :class="[item.isActive ? 'title-item-active' : 'title-item']"
+        >
+          {{ item.title }}
+        </div>
+      </div>
     </div>
-    <DemoBar v-if="activeName === '1'"></DemoBar>
+    <DemoBar v-if="activeName === '1'" :detail="detail"></DemoBar>
     <DemoLine v-if="activeName === '2'"></DemoLine>
     <DemoMap v-if="activeName === '3'"></DemoMap>
     <DemoPie v-if="activeName === '4'"></DemoPie>
@@ -32,7 +36,8 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, reactive, toRefs, ref } from "vue";
+import { defineComponent, reactive, toRefs, ref, onMounted } from "vue";
+import userData from "@/api/getUserData";
 import router from "@/router";
 import DemoBar from "@/views/childrenTab/demoBar.vue";
 import DemoLine from "@/views/childrenTab/demoLine.vue";
@@ -48,43 +53,73 @@ export default defineComponent({
     const editNames = reactive([
       {
         title: "柱状图比较",
-        name: "1",
-        content: DemoBar,
+        name: 1,
+        isActive: true,
       },
       {
         title: "折线图比较",
-        name: "2",
-        content: DemoBar,
+        name: 2,
+        isActive: false,
       },
       {
-        title: "折线图比较",
-        name: "3",
-        content: DemoBar,
+        title: "地图比较",
+        name: 3,
+        isActive: false,
+      },
+      {
+        title: "饼图比较",
+        name: 4,
+        isActive: false,
       },
     ]);
+    let isActive = ref(true);
     // const handleClick = (tab: any, event: any) => {
     //   activeName = tab.props.name
     //   console.log(tab.props.name, activeName);
     // };
+    onMounted(() => {
+      getUser();
+    });
+    let detail = reactive([]);
+    const getUser = () => {
+      let params = {
+        startTime: "123",
+      };
+      userData.getUserData(params).then((res: any) => {
+        detail = res.object;
+        // console.log(detail)
+      });
+    };
+    const mapLabels = ['', "DemoBar", "DemoLine", "DemoMap", "DemoPie"]
     const goTo = (index: number) => {
       // activeName.value = "2"
-      console.log(index);
-      if (index === 1) {
-        router.push({ name: "DemoBar" });
-        activeName.value = "1";
-      } else if (index === 2) {
-        router.push({ name: "DemoLine" });
-        activeName.value = "2";
-      } else if (index === 3) {
-        activeName.value = "3";
-      } else if (index === 4) {
-        activeName.value = "4";
-      }
+      editNames.forEach((item: Record<string, unknown>) => {
+        item.isActive = item.name === index ? true : false
+      })
+      activeName.value = String(index)
+      router.push({name: mapLabels[index]})
+      // if (index === 1) {
+      //   router.push({ name: "DemoBar" });
+      //   activeName.value = "1";
+      //   item.isActive = true;
+      // } else if (index === 2) {
+      //   router.push({ name: "DemoLine" });
+      //   activeName.value = "2";
+      //   item.isActive = true;
+      // } else if (index === 3) {
+      //   activeName.value = "3";
+      //   item.isActive = true;
+      // } else if (index === 4) {
+      //   activeName.value = "4";
+      //   item.isActive = true;
+      // }
     };
     return {
       activeName,
       editNames,
       goTo,
+      detail,
+      isActive,
       // handleClick,
       ...toRefs(setIt),
     };
@@ -109,4 +144,9 @@ export default defineComponent({
       //  border 1px solid #fff
       &:active
         background red
+    .title-item-active
+      margin 0 20px 20px 0
+      border 1px solid #404040
+      cursor pointer
+      background bisque
 </style>

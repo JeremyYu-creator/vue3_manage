@@ -7,7 +7,7 @@
       <el-container>
         <Aside />
         <el-main>
-          <div style="margin-top: 40px">
+          <div style="margin-top: 30px">
             <router-view />
           </div>
         </el-main>
