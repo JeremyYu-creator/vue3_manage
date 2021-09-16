@@ -5,7 +5,7 @@
 </template>
 
 <script>
-import { defineComponent, onBeforeMount, onMounted, reactive, ref } from "vue";
+import { defineComponent, onMounted, ref } from "vue";
 import { Chart } from "@antv/g2";
 import userData from "@/api/getUserData";
 export default defineComponent({
@@ -32,7 +32,7 @@ export default defineComponent({
       };
       userData.getUserData(params).then((res) => {
         detail.value = res.object;
-        console.log(detail, 1)
+        // console.log(detail, 1)
         const chart = new Chart({
           container: "container",
           autoFit: true,

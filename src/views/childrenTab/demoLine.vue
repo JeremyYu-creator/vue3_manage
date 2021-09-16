@@ -5,8 +5,9 @@
 </template>
 
 <script>
-import { defineComponent, onMounted } from "vue";
+import { defineComponent, onMounted, ref } from "vue";
 import { Chart } from "@antv/g2";
+import userData from "@/api/getUserData";
 export default defineComponent({
   name: "demoLine",
   setup() {
@@ -48,32 +49,41 @@ export default defineComponent({
         value: 13,
       },
     ];
+    let cityData = ref([]);
+    const getUserInfo = () => {
+      const params = {
+        startTime: 123,
+      };
+      userData.getUserData(params).then((res) => {
+        cityData.value = res.object;
+        const chart = new Chart({
+          container: "map",
+          // forceFit: true,
+          autoFit: true,
+          // height: window.innerHeight
+          height: 500,
+        });
+        chart.data(cityData.value);
+        chart.scale("city", {});
+        chart.scale("count", {
+          // range: [0, 1],
+          min: 0,
+        });
+        chart.tooltip({
+          crosshairs: {
+            type: "line",
+          },
+        });
+        chart.line().position("city*count");
+        chart.point().position("city*count").size(4).shape("circle").style({
+          stroke: "#fff",
+          lineWidth: 1,
+        });
+        chart.render();
+      });
+    };
     onMounted(() => {
-      const chart = new Chart({
-        container: "map",
-        // forceFit: true,
-        autoFit: true,
-        // height: window.innerHeight
-        height: 500,
-      });
-      chart.data(data);
-      chart.scale("value", {
-        min: 0,
-      });
-      chart.scale("year", {
-        range: [0, 1],
-      });
-      chart.tooltip({
-        crosshairs: {
-          type: "line",
-        },
-      });
-      chart.line().position("year*value");
-      chart.point().position("year*value").size(4).shape("circle").style({
-        stroke: "#fff",
-        lineWidth: 1,
-      });
-      chart.render();
+      getUserInfo();
     });
   },
 });

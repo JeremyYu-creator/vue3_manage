@@ -27,6 +27,7 @@
     <DemoLine v-if="activeName === '2'"></DemoLine>
     <DemoMap v-if="activeName === '3'"></DemoMap>
     <DemoPie v-if="activeName === '4'"></DemoPie>
+    <DemoG2Map v-if="activeName === '5'"></DemoG2Map>
   </div>
   <!--  <div class="title">{{ name }}</div>-->
   <!--  <div class="title">{{ age }}</div>-->
@@ -43,10 +44,11 @@ import DemoBar from "@/views/childrenTab/demoBar.vue";
 import DemoLine from "@/views/childrenTab/demoLine.vue";
 import DemoMap from "@/views/childrenTab/demoMap.vue";
 import DemoPie from "@/views/childrenTab/demoPie.vue";
+import DemoG2Map from "@/views/childrenTab/demoG2Map.vue";
 // import { Chart } from "@antv/g2";
 export default defineComponent({
   name: "checkRoute",
-  components: { DemoPie, DemoLine, DemoBar, DemoMap },
+  components: { DemoG2Map, DemoPie, DemoLine, DemoBar, DemoMap },
   setup() {
     const setIt = reactive({ name: "李四", age: 30 }); /**/
     let activeName = ref("1");
@@ -69,6 +71,11 @@ export default defineComponent({
       {
         title: "饼图比较",
         name: 4,
+        isActive: false,
+      },
+      {
+        title: "钻取地图比较",
+        name: 5,
         isActive: false,
       },
     ]);

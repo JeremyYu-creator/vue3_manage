@@ -44,6 +44,11 @@ const routes: Array<RouteRecordRaw> = [
             name: "DemoPie",
             component: () => import("../views/childrenTab/demoPie.vue"),
           },
+          {
+            path: "/demoG2Map",
+            name: "DemoG2Map",
+            component: () => import("../views/childrenTab/demoG2Map.vue"),
+          },
         ],
       },
       {

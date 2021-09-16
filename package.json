@@ -22,6 +22,7 @@
     "core-js": "^3.6.5",
     "cropperjs": "^1.5.12",
     "element-plus": "^1.1.0-beta.7",
+    "moment": "^2.29.1",
     "stylus": "^0.54.8",
     "vue": "^3.0.0",
     "vue-amap": "^0.5.10",
