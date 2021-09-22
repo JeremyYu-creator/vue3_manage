@@ -23,6 +23,33 @@ const routes: Array<RouteRecordRaw> = [
         path: "/checkRoute",
         name: "CheckRoute",
         component: () => import("../views/newDirec/checkRoute.vue"),
+        children: [
+          {
+            path: "/demoBar",
+            name: "DemoBar",
+            component: () => import("../views/childrenTab/demoBar.vue"),
+          },
+          {
+            path: "/demoLine",
+            name: "DemoLine",
+            component: () => import("../views/childrenTab/demoLine.vue"),
+          },
+          {
+            path: "/demoMap",
+            name: "DemoMap",
+            component: () => import("../views/childrenTab/demoMap.vue"),
+          },
+          {
+            path: "/demoPie",
+            name: "DemoPie",
+            component: () => import("../views/childrenTab/demoPie.vue"),
+          },
+          {
+            path: "/demoG2Map",
+            name: "DemoG2Map",
+            component: () => import("../views/childrenTab/demoG2Map.vue"),
+          },
+        ],
       },
       {
         path: "/home",
