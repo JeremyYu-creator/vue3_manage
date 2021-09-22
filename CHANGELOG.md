@@ -1,9 +1,10 @@
-# 0.1.0 (2021-09-16)
+# 0.1.0 (2021-09-22)
 
 ### 🌟 新功能
 范围|描述|commitId
 --|--|--
  - | 地图初版完成，待联调数据 | [280830c](https://github.com/JeremyYu-creator/vue3_try/commit/280830c)
+ - | 地图设置初步完成，但钻取地图尚未完成 | [badcdfd](https://github.com/JeremyYu-creator/vue3_try/commit/badcdfd)
 
 
 范围|描述|commitId

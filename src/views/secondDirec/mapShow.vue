@@ -29,6 +29,13 @@
         v-loading="loading"
         >显示搜索具体位置</el-button
       >
+      <el-button
+        type="primary"
+        v-if="searchDriving"
+        @click="showHidden(5)"
+        v-loading="loading"
+        >显示设定路线框</el-button
+      >
     </div>
     <div id="map" style="width: 100%; height: 98%"></div>
     <div v-loading="loading" class="loading-style" v-if="tag">
@@ -109,11 +116,60 @@
         <el-button @click="searchPlace" type="primary" plain>搜索</el-button>
       </div>
     </div>
-    <div class="route">规划路线</div>
+    <div class="route" v-if="drivingTag">
+      <el-card>
+        <div class="title">
+          <div>规划路线</div>
+          <div class="close">
+            <i class="el-icon-circle-close" @click="closeWeather(5)"></i>
+          </div>
+        </div>
+        <el-tabs type="border-card" v-model="activeName">
+          <el-tab-pane
+            :name="item.index"
+            v-for="(item, index) in tabLabels"
+            :key="index"
+          >
+            <template #label>
+              <span>
+                <!--                <el-icon>-->
+                <!--                  <bicycle />-->
+                <!--                </el-icon>-->
+                <i :class="item.icon"></i>
+                {{ item.name }}
+              </span>
+            </template>
+            <el-form
+              :model="ruleForm"
+              :rules="rules"
+              ref="divRef"
+              label-width="5rem"
+              class="demo-ruleForm"
+            >
+              <el-form-item label="所在城市" prop="provinceValue">
+                <el-input v-model="ruleForm.provinceValue"></el-input>
+              </el-form-item>
+              <el-form-item label="出发地点" prop="wantPlaceStartValue">
+                <el-input v-model="ruleForm.wantPlaceStartValue"></el-input>
+              </el-form-item>
+              <el-form-item label="目标地点" prop="wantPlaceEndValue">
+                <el-input v-model="ruleForm.wantPlaceEndValue"></el-input>
+              </el-form-item>
+            </el-form>
+            <div class="btn-route">
+              <el-button type="primary" @click="submitForm(item.index)"
+                >搜索</el-button
+              >
+            </div>
+          </el-tab-pane>
+        </el-tabs>
+      </el-card>
+    </div>
+    <div id="panel"></div>
   </div>
 </template>
 
-<script>
+<script lang="ts">
 // import { GoogleMap, Marker } from "vue3-google-map";
 import { onMounted, ref, onBeforeMount, reactive } from "vue";
 import AMapLoader from "@amap/amap-jsapi-loader";
@@ -131,6 +187,7 @@ export default {
           "AMap.ToolBar",
           "AMap.PlaceSearch",
           "AMap.Marker",
+          "AMap.Geolocation",
         ], // 需要使用的的插件列表，如比例尺'AMap.Scale'等
         AMapUI: {
           // 是否加载 AMapUI，缺省不加载
@@ -145,9 +202,23 @@ export default {
         .then((AMap) => {
           const map = new AMap.Map("map", {
             zoom: 15, //级别
-            center: [116.4929, 39.942], //中心点坐标: 这里可以写成动态获取坐标吗？小程序方面需要获取用户允许才可以拿到位置
-            // 上海市区经纬度:(121.43333,34.50000)
+            // center: [116.4929, 39.942], //中心点坐标: 这里可以写成动态获取坐标吗？小程序方面需要获取用户允许才可以拿到位置
             viewMode: "3D", //使用3D视图
+          });
+          const geolocation = new AMap.Geolocation({
+            enableHighAccuracy: true,
+            timeout: 10000,
+            buttonOffset: new AMap.Pixel(10, 20), //定位按钮与设置的停靠位置的偏移量，默认：Pixel(10, 20)
+            zoomToAccuracy: true,
+          });
+          map.addControl(geolocation);
+          geolocation.getCurrentPosition(function (status: any, result: any) {
+            if (status == "complete") {
+              console.log(result);
+              console.log(result.position.lng, result.position.lat); // 可以拿到坐标
+            } else {
+              console.log(result);
+            }
           });
           const tool = new AMap.ToolBar();
           map.addControl(tool);
@@ -158,25 +229,20 @@ export default {
           map.add(trafficLayer); //添加图层到地图
           // AMap.plugins("AMap.Weather", function() {
           const weather = new AMap.Weather();
-          weather.getLive("北京市", function (err, data) {
+          weather.getLive("北京市", function (err: any, data: any) {
             // 获取该城市的当前天气情况
             console.log(err, data);
             getInfo.value = data;
             loading.value = false;
             console.log(getInfo.value);
           });
-          weather.getForecast("北京市", function (err, data) {
+          weather.getForecast("北京市", function (err: any, data: any) {
             // 获取该城市未来的天气状况
             console.log(err, data);
             forecastArr.value = data.forecasts;
             updateTime.value = data.reportTime;
             futureLoading.value = false;
           });
-          // if (!cityName.value) {
-          //   cityName.value = "北京市"
-          // }
-          // map.setCity(cityName.value)
-          // ElMessage.success(`已跳转到${cityName.value}`)
         })
         .catch((e) => {
           console.log(e);
@@ -203,8 +269,8 @@ export default {
     ]);
     const show = ref(true);
     let tagFuture = ref(false);
-    const closeWeather = (index) => {
-      // 关闭选择页
+    const closeWeather = (index: number) => {
+      // 关闭选择页(可以考虑优化下)
       if (index === 1) {
         tag.value = false;
         nowTag.value = true;
@@ -217,9 +283,12 @@ export default {
       } else if (index === 4) {
         tagPlace.value = true;
         placeTag.value = false;
+      } else if (index === 5) {
+        searchDriving.value = true;
+        drivingTag.value = false;
       }
     };
-    const showHidden = (index) => {
+    const showHidden = (index: number) => {
       // 显示btn进行控制
       if (index === 1) {
         tag.value = true;
@@ -233,6 +302,9 @@ export default {
       } else if (index === 4) {
         tagPlace.value = false;
         placeTag.value = true;
+      } else if (index === 5) {
+        searchDriving.value = false;
+        drivingTag.value = true;
       }
     };
     let tagSearchCity = ref(false);
@@ -275,14 +347,14 @@ export default {
           map.add(trafficLayer); //添加图层到地图
           // AMap.plugins("AMap.Weather", function()
           const weather = new AMap.Weather();
-          weather.getLive(cityName.value, function (err, data) {
+          weather.getLive(cityName.value, function (err: any, data: any) {
             // 获取该城市的当前天气情况
             console.log(err, data);
             getInfo.value = data;
             loading.value = false;
             console.log(getInfo.value);
           });
-          weather.getForecast(cityName.value, function (err, data) {
+          weather.getForecast(cityName.value, function (err: any, data: any) {
             // 获取该城市未来的天气状况
             console.log(err, data);
             forecastArr.value = data.forecasts;
@@ -354,47 +426,205 @@ export default {
           const placeSearch = new AMap.PlaceSearch({
             map: map,
             city: cityName.value,
-            // citylimit: true, //是否强制限制在设置的城市内搜索
+            citylimit: false, //是否强制限制在设置的城市内搜索
             pageSize: 20, // 每页限制多少条数(目前是这样：返回数据只能是1页，但是1页里的条数可以设置)
             extensions: "base", //返回基本地址信息
           });
-          // const auto = new AMap.Autocomplete({
-          //   input: "tipinput",
-          // });
-          // auto;
-          placeSearch.search(aimPlace.value, function (status, result) {
-            // console.log(aimPlace.value)
-            console.log(result);
-            const pois = result.poiList.pois;
-            for (let i = 0; i < pois.length; i++) {
-              const poi = pois[i];
-              const marker = [];
-              marker[i] = new AMap.Marker({
-                position: poi.location,
-                title: poi.name,
-              });
-              map.add(marker[i]);
-              // const infoWindow = new AMap.infoWindow({
-              //   autoMove: true,
-              //   offset: {
-              //     x: 0,
-              //     y: -30,
-              //   },
-              // });
-              // const createContent = (poi) => {
-              //   const s = [];
-              //   s.push("<b>名称：" + poi.name+"</b>");
-              //   s.push("地址：" + poi.address);
-              //   s.push("电话：" + poi.tel);
-              //   s.push("类型：" + poi.type);
-              //   return s.join("<br>");
-              // }
-              // map.setCenter(marker.getPostion())
-              // infoWindow.setContent(createContent(poi))
-              // infoWindow.open(map,marker.getPosition())
+
+          placeSearch.search(
+            aimPlace.value,
+            function (status: any, result: any) {
+              // console.log(aimPlace.value)
+              console.log(result);
+              const pois = result.poiList.pois;
+              for (let i = 0; i < pois.length; i++) {
+                const poi = pois[i];
+                const marker = [];
+                marker[i] = new AMap.Marker({
+                  position: poi.location,
+                  title: poi.name,
+                });
+                map.add(marker[i]);
+              }
+              map.setFitView();
             }
-            map.setFitView();
+          );
+        })
+        .catch((e) => {
+          console.log(e);
+        });
+    };
+    let ruleForm = ref({
+      // 启用表单限制输入
+      provinceValue: "",
+      wantPlaceStartValue: "",
+      wantPlaceEndValue: "",
+    });
+    let rules = reactive({
+      provinceValue: [
+        { required: true, message: "请输入所在省份", trigger: "blur" },
+      ],
+      wantPlaceStartValue: [
+        { required: true, message: "请输入起始地点", trigger: "blur" },
+      ],
+      wantPlaceEndValue: [
+        { required: true, message: "请输入目标地点", trigger: "blur" },
+      ],
+    });
+    const divRef = ref(null);
+    const submitForm = (index: string) => {
+      // 验证提交表单
+      (divRef.value as any).validate((valid: any) => {
+        if (valid) {
+          routeDrive(index);
+        } else {
+          ElMessage.error("请输入完整搜索信息!");
+          return false;
+        }
+      });
+    };
+    const activeName = ref("1");
+    const tabLabels = ref([
+      {
+        name: "公交路线规划",
+        icon: "el-icon-truck",
+        index: "1",
+      },
+      {
+        name: "驾车路线规划",
+        icon: "el-icon-location-outline",
+        index: "2",
+      },
+      {
+        name: "骑行路线规划",
+        icon: "el-icon-bicycle",
+        index: "3",
+      },
+    ]);
+    let searchDriving = ref(true);
+    let drivingTag = ref(false);
+    const routeDrive = (index: string) => {
+      AMapLoader.load({
+        key: "41417da0b45d919952ca225160450a43", // 申请好的Web端开发者Key，首次调用 load 时必填
+        version: "1.4.15", // 指定要加载的 JSAPI 的版本，缺省时默认为 1.4.15
+        plugins: [
+          "AMap.Weather",
+          "AMap.ToolBar",
+          "AMap.PlaceSearch",
+          "AMap.Marker",
+          "AMap.Autocomplete",
+          "AMap.Driving",
+          "AMap.DragRoute",
+          "AMap.Geocoder",
+          "AMap.Transfer",
+          "AMap.Riding",
+        ], // 需要使用的的插件列表，如比例尺'AMap.Scale'等
+        AMapUI: {
+          // 是否加载 AMapUI，缺省不加载
+          version: "1.1", // AMapUI 缺省 1.1
+          plugins: [], // 需要加载的 AMapUI ui插件
+        },
+        Loca: {
+          // 是否加载 Loca， 缺省不加载
+          version: "1.3.2", // Loca 版本，缺省 1.3.2
+        },
+      })
+        .then((AMap) => {
+          const map = new AMap.Map("map", {
+            resizeEnable: true,
+            zoom: 15, //级别
+            center: [116.4929, 39.942], //中心点坐标: 这里可以写成动态获取坐标吗？下一步可以考虑考虑如何获取当前位置坐标，但可能和api使用有关
+            viewMode: "3D", //使用3D视图
           });
+          console.log(index);
+          if (index === "2") {
+            const driving = new AMap.Driving({
+              // 展示路线详情
+              map: map,
+              panel: "panel",
+            });
+            driving.search(
+              [
+                {
+                  keyword: ruleForm.value.wantPlaceStartValue,
+                  city: ruleForm.value.provinceValue,
+                },
+                {
+                  keyword: ruleForm.value.wantPlaceEndValue,
+                  city: ruleForm.value.provinceValue,
+                },
+              ],
+              function (status: any, result: any) {
+                if (status === "complete") {
+                  ElMessage.success("绘制驾车路线完成");
+                } else {
+                  ElMessage.error("获取驾车数据失败：" + result);
+                }
+              }
+            );
+          } else if (index === "1") {
+            const transOptions = reactive({
+              map: map,
+              city: ruleForm.value.provinceValue,
+              panel: "panel",
+              policy: AMap.TransferPolicy.LEAST_TIME, //乘车策略
+            });
+            const transfer = new AMap.Transfer(transOptions);
+            transfer.search(
+              [
+                {
+                  keyword: ruleForm.value.wantPlaceStartValue,
+                  city: ruleForm.value.provinceValue,
+                },
+                {
+                  keyword: ruleForm.value.wantPlaceEndValue,
+                  city: ruleForm.value.provinceValue,
+                },
+              ],
+              function (status: any, result: any) {
+                if (status === "complete") {
+                  ElMessage.success("绘制交通路线完成！");
+                } else {
+                  ElMessage.error("绘制失败！" + result);
+                }
+              }
+            );
+          } else if (index === "3") {
+            const riding = new AMap.Riding({
+              map: map,
+              panel: "panel",
+            });
+            riding.search(
+              [
+                {
+                  keyword: ruleForm.value.wantPlaceStartValue,
+                  city: ruleForm.value.provinceValue,
+                },
+                {
+                  keyword: ruleForm.value.wantPlaceEndValue,
+                  city: ruleForm.value.provinceValue,
+                },
+              ],
+              function (status: any, result: any) {
+                if (status === "complete") {
+                  ElMessage.success("骑行路线绘制成功!");
+                } else {
+                  ElMessage.error("该路线绘制失败！" + result);
+                }
+              }
+            );
+          }
+
+          // const geocoder = new AMap.Geocoder();
+          const tool = new AMap.ToolBar();
+          map.addControl(tool);
+          const trafficLayer = new AMap.TileLayer.Traffic({
+            // 显示当前路段的交通情况
+            zIndex: 10,
+          });
+          map.add(trafficLayer); //添加图层到地图
+          drivingTag.value = false;
+          searchDriving.value = true;
         })
         .catch((e) => {
           console.log(e);
@@ -433,6 +663,14 @@ export default {
       aimPlace,
       placeTag,
       tagPlace,
+      submitForm,
+      ruleForm,
+      rules,
+      divRef,
+      searchDriving,
+      drivingTag,
+      tabLabels,
+      activeName,
     };
   },
 };
@@ -466,7 +704,7 @@ export default {
     background #fff
     display inline-block
     padding 0 0.5rem
-    top 30%
+    top 60%
     left 30%
     border-radius 4px
     .info
@@ -585,4 +823,50 @@ export default {
       padding 1rem
       .input-place
         width 10rem
+  .route
+    width 30rem
+    position absolute
+    top 20%
+    left 30%
+    .btn-route
+      display flex
+      justify-content flex-end
+    .title
+      font-size 1rem
+      border-bottom 0.1rem solid black
+      margin-bottom 1rem
+      padding-bottom 0.5rem
+      display flex
+      justify-content space-between
+      .close
+        cursor pointer
+    .range-item
+      display flex
+      align-items center
+      margin-bottom 1rem
+      .txt
+        width 5rem
+        font-size 0.8rem
+      .input-style
+        width 10rem
+      // display flex
+  #panel {
+    position: fixed;
+    background-color: white;
+    max-height: 90%;
+    overflow-y: auto;
+    top: 10px;
+    right: 10px;
+    width: 280px;
+  }
+  #panel .amap-call {
+    background-color: #009cf9;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+  }
+  #panel .amap-lib-driving {
+    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
+    overflow: hidden;
+  }
 </style>
