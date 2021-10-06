@@ -13,7 +13,7 @@
         v-if="futureTag"
         @click="showHidden(2)"
         v-loading="loading"
-        >显示未来一周天气预报</el-button
+        >显示未来四天天气预报</el-button
       >
       <el-button
         type="primary"
@@ -165,7 +165,11 @@
         </el-tabs>
       </el-card>
     </div>
-    <div id="panel"></div>
+    <div id="panel">
+      <!--      <template>-->
+      <!--       <i class=""></i>-->
+      <!--      </template>-->
+    </div>
   </div>
 </template>
 
@@ -174,6 +178,7 @@
 import { onMounted, ref, onBeforeMount, reactive } from "vue";
 import AMapLoader from "@amap/amap-jsapi-loader";
 import { ElMessage } from "element-plus";
+import { useStore } from "@/store";
 
 export default {
   name: "mapShow",
@@ -188,6 +193,7 @@ export default {
           "AMap.PlaceSearch",
           "AMap.Marker",
           "AMap.Geolocation",
+          // "AMap.IndoorMap",
         ], // 需要使用的的插件列表，如比例尺'AMap.Scale'等
         AMapUI: {
           // 是否加载 AMapUI，缺省不加载
@@ -204,7 +210,10 @@ export default {
             zoom: 15, //级别
             // center: [116.4929, 39.942], //中心点坐标: 这里可以写成动态获取坐标吗？小程序方面需要获取用户允许才可以拿到位置
             viewMode: "3D", //使用3D视图
+            // showIndoorMap:false, // 隐藏地图自带的室内地图图层
           });
+          // const indoorMap = new AMap.IndoorMap(alwaysShow: true)
+
           const geolocation = new AMap.Geolocation({
             enableHighAccuracy: true,
             timeout: 10000,
@@ -233,6 +242,10 @@ export default {
             // 获取该城市的当前天气情况
             console.log(err, data);
             getInfo.value = data;
+            store.commit("getWeatherInfo", {
+              data: getInfo.value,
+            });
+            console.log(store.state, 1)
             loading.value = false;
             console.log(getInfo.value);
           });
@@ -257,6 +270,7 @@ export default {
     let nowTag = ref(true);
     let futureTag = ref(true);
     let cityName = ref("");
+    const store = useStore();
     const mapLabels = reactive([
       "",
       "星期一",
@@ -352,7 +366,7 @@ export default {
             console.log(err, data);
             getInfo.value = data;
             loading.value = false;
-            console.log(getInfo.value);
+            // console.log(getInfo.value);
           });
           weather.getForecast(cityName.value, function (err: any, data: any) {
             // 获取该城市未来的天气状况
@@ -407,22 +421,6 @@ export default {
             zIndex: 10,
           });
           map.add(trafficLayer); //添加图层到地图
-          // AMap.plugins("AMap.Weather", function() {
-          // const weather = new AMap.Weather();
-          // weather.getLive(cityName.value, function (err, data) {
-          //   // 获取该城市的当前天气情况
-          //   console.log(err, data);
-          //   getInfo.value = data;
-          //   loading.value = false;
-          //   console.log(getInfo.value);
-          // });
-          // weather.getForecast(cityName.value, function (err, data) {
-          //   // 获取该城市未来的天气状况
-          //   console.log(err, data);
-          //   forecastArr.value = data.forecasts;
-          //   updateTime.value = data.reportTime;
-          //   futureLoading.value = false;
-          // });
           const placeSearch = new AMap.PlaceSearch({
             map: map,
             city: cityName.value,
@@ -532,11 +530,12 @@ export default {
         .then((AMap) => {
           const map = new AMap.Map("map", {
             resizeEnable: true,
-            zoom: 15, //级别
+            zoom: 20, //级别
             center: [116.4929, 39.942], //中心点坐标: 这里可以写成动态获取坐标吗？下一步可以考虑考虑如何获取当前位置坐标，但可能和api使用有关
             viewMode: "3D", //使用3D视图
+            zoomEnable: true,
           });
-          console.log(index);
+          // console.log(index);
           if (index === "2") {
             const driving = new AMap.Driving({
               // 展示路线详情
@@ -583,6 +582,7 @@ export default {
               ],
               function (status: any, result: any) {
                 if (status === "complete") {
+                  console.log(result);
                   ElMessage.success("绘制交通路线完成！");
                 } else {
                   ElMessage.error("绘制失败！" + result);
@@ -826,7 +826,7 @@ export default {
   .route
     width 30rem
     position absolute
-    top 20%
+    top 17%
     left 30%
     .btn-route
       display flex

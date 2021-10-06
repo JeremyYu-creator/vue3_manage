@@ -2,7 +2,7 @@
   <div class="errPage-container">
     <el-row>
       <el-col :span="12">
-        <h1 class="text-jumbo text-ginormous">VUE3 Admin</h1>
+        <h1 class="text-jumbo text-ginormous">VUE3 MANAGER</h1>
         <h2>当前页面丢失了</h2>
         <h6>去别处看看吧</h6>
       </el-col>

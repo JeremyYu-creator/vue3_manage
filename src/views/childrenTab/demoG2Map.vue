@@ -201,7 +201,7 @@ export default defineComponent({
       scene.on("loaded", () => {
         new DrillDownLayer(scene, {
           // data: [],
-          // provinceData: ProvinceData,
+          provinceData: ProvinceData,
           viewStart: "Country",
           viewEnd: "City",
           fill: {

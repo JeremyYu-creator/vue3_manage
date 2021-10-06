@@ -1,4 +1,4 @@
-# 0.1.0 (2021-09-22)
+# 0.1.0 (2021-10-06)
 
 ### 🌟 新功能
 范围|描述|commitId
@@ -6,6 +6,7 @@
  - | 地图初版完成，待联调数据 | [280830c](https://github.com/JeremyYu-creator/vue3_try/commit/280830c)
  - | 地图设置初步完成，但钻取地图尚未完成 | [badcdfd](https://github.com/JeremyYu-creator/vue3_try/commit/badcdfd)
  - | 增加导航功能 | [4bc2436](https://github.com/JeremyYu-creator/vue3_try/commit/4bc2436)
+ - | 新增导航功能 | [73de3c5](https://github.com/JeremyYu-creator/vue3_try/commit/73de3c5)
 
 
 范围|描述|commitId
@@ -14,6 +15,7 @@
  - | 新增搜索地区功能 | [c004aec](https://github.com/JeremyYu-creator/vue3_try/commit/c004aec)
  - | 增加各地区查询功能 | [ff0e97d](https://github.com/JeremyYu-creator/vue3_try/commit/ff0e97d)
  - | 新增地图地段天气展示 | [dd7bb79](https://github.com/JeremyYu-creator/vue3_try/commit/dd7bb79)
+ - | 初版设置 | [f4a7643](https://github.com/JeremyYu-creator/vue3_try/commit/f4a7643)
  - | 增加页面 | [82131c6](https://github.com/JeremyYu-creator/vue3_try/commit/82131c6)
  - | 上传新页面 | [24b4241](https://github.com/JeremyYu-creator/vue3_try/commit/24b4241)
  - | 初始化布局 | [8082018](https://github.com/JeremyYu-creator/vue3_try/commit/8082018)
