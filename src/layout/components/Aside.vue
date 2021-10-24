@@ -32,6 +32,7 @@
           <span>导航二</span>
         </template>
         <el-menu-item index="2-1" @click="toMap">查看地图</el-menu-item>
+        <el-menu-item index="2-2" @click="toDraw">绘画图形</el-menu-item>
       </el-sub-menu>
       <el-menu-item index="3" disabled>
         <i class="el-icon-document"></i>
@@ -96,6 +97,9 @@ export default {
     const toFly = () => {
       router.push({name: "ToFly"})
     }
+    const toDraw = () => {
+      router.push({name: "Draw"})
+    }
     return {
       index,
       label,
@@ -107,6 +111,7 @@ export default {
       toCheckRoute,
       toMap,
       toFly,
+      toDraw,
     };
   },
 };

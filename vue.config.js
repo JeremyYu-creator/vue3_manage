@@ -38,7 +38,7 @@ module.exports = {
     },
     proxy: {
       '/api': {
-        target: 'https://mptest.rjfittime.com',
+        target: 'http://fe-flutterserver-test.rjfittime.com',
         // target: "http://192.168.3.86:8080",
         changeOrigin: true,
         ws: true,

@@ -67,6 +67,11 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import("../views/secondDirec/mapShow.vue"),
       },
       {
+        path: "/draw",
+        name: "Draw",
+        component: () => import("../views/secondDirec/draw.vue"),
+      },
+      {
         path: "/toFly",
         name: "ToFly",
         component: () => import("../views/secondDirec/toFly.vue"),
