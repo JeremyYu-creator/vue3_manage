@@ -38,7 +38,7 @@
 
 <script lang="ts">
 import { defineComponent, reactive, toRefs, ref, onMounted } from "vue";
-import userData from "@/api/getUserData";
+import { userData } from "@/api/getUserData";
 import router from "@/router";
 import DemoBar from "@/views/childrenTab/demoBar.vue";
 import DemoLine from "@/views/childrenTab/demoLine.vue";
@@ -92,7 +92,7 @@ export default defineComponent({
       let params = {
         startTime: "123",
       };
-      userData.getUserData(params).then((res: any) => {
+      userData(params).then((res: any) => {
         detail = res.object;
         // console.log(detail)
       });

@@ -77,6 +77,11 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import("../views/secondDirec/toFly.vue"),
       },
       {
+        path: "/news",
+        name: "News",
+        component: () => import("../views/secondDirec/news.vue"),
+      },
+      {
         path: "/404",
         name: "404",
         component: () => import("../views/secondDirec/error.vue"),

@@ -1,6 +1,6 @@
 <template>
   <div class="main">
-        <canvas id="box" width="600" height="600"></canvas>
+    <canvas id="box" width="600" height="600"></canvas>
     <canvas id="try" width="300" height="300"></canvas>
   </div>
 </template>
@@ -115,7 +115,7 @@ export default {
       }, 1000);
       const canvasTry = document.getElementById("try");
       const ctx2 = canvasTry.getContext("2d");
-      ctx2.translate(100, 100);
+      ctx2.translate(110, 110);
       ctx2.save();
       ctx2.beginPath();
       ctx2.arc(0, 0, 100, 0, 2 * Math.PI);
@@ -125,6 +125,7 @@ export default {
       ctx2.closePath();
       ctx2.beginPath();
       ctx2.arc(0, 0, 10, 0, 2 * Math.PI);
+      ctx2.fillStyle = "black";
       ctx2.stroke();
       ctx2.closePath();
     });

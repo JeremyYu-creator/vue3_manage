@@ -14,7 +14,6 @@
 </template>
 <script lang="ts">
 import { defineComponent, reactive, toRefs, watch, provide, ref } from "vue";
-// import Home from "../../src/views/Home.vue";
 import Home from "@/views/newDirec/Home.vue";
 export default defineComponent({
   components: { Home },

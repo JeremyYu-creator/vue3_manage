@@ -42,15 +42,22 @@ module.exports = {
         // target: "http://192.168.3.86:8080",
         changeOrigin: true,
         ws: true,
-        pathRewrite: {
-          // '^/api': '/'
-        }
       },
       '/oauth': {
         target: 'https://mptest.rjfittime.com',
         changeOrigin: true,
         ws: true
-      }
+      },
+      '/dfz': {
+        target: 'http://interface.sina.cn',
+        changeOrigin: true,
+        ws: true,
+      },
+      '/ent': {
+        target: 'https://interface.sina.cn',
+        changeOrigin: true,
+        ws: true,
+      },
     }
   }
 }

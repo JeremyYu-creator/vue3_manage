@@ -19,16 +19,16 @@
 </template>
 
 <script lang="ts">
-// import imgs from "../../assets/404.png";
+// import imgs from "@/assets/404.png";
 // import { ref } from "vue";
 export default {
   name: "401",
   setup() {
     // const img = ref(`${imgs}?${new Date()}`);
     // return {
-    //   img
+    //   img,
     // };
-  }
+  },
 };
 </script>
 

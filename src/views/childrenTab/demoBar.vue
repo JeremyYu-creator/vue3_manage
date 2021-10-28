@@ -7,11 +7,11 @@
 <script>
 import { defineComponent, onMounted, ref } from "vue";
 import { Chart } from "@antv/g2";
-import userData from "@/api/getUserData";
+import { userData } from "@/api/getUserData";
 export default defineComponent({
   name: "demoBar",
 
-  setup(){
+  setup() {
     // const data = [
     //   { year: "1951 年", sales: 38 },
     //   { year: "1952 年", sales: 52 },
@@ -30,9 +30,8 @@ export default defineComponent({
       let params = {
         startTime: "123",
       };
-      userData.getUserData(params).then((res) => {
-        detail.value = res.object;
-        // console.log(detail, 1)
+      userData(params).then((res) => {
+        detail.value = res.data.object;
         const chart = new Chart({
           container: "container",
           autoFit: true,
@@ -47,21 +46,14 @@ export default defineComponent({
         });
         chart.interaction("active-region");
         chart.interval().position("city*count");
-        // data.forEach((item) => {
-        //
-        // })
         chart.render();
       });
     };
     onMounted(() => {
-      // debugger
-      console.log(2)
-      getUser()
+      getUser();
     });
   },
 });
 </script>
 
-<style scoped>
-
-</style>
+<style scoped></style>

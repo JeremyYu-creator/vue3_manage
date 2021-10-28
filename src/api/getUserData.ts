@@ -1,12 +1,10 @@
-import instance from "@/service/interceptor";
-const userData = {
-  getUserData(params: any) {
-    return instance({
-      // url: "/api/logAnalysis/countSportErrLog",
-      url: "http://apidoc.rjft.net/mock/290/api/logAnalysis/countSportErrLog",
-      params,
-      method: "get",
-    });
-  },
+// import instance from "@/service/interceptor";
+import {get} from '@/service/interceptor'
+export const userData = (params: any) => {
+  return get(
+    'http://apidoc.rjft.net/mock/290/api/logAnalysis/countSportErrLog',
+    {params},
+    0,
+    true,
+  )
 };
-export default userData

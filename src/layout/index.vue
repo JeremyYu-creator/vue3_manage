@@ -38,10 +38,12 @@ export default {
 
 .el-header {
   padding: 0 40px 0 30px;
+  height 20px
 }
 
 .el-container
-  min-height: calc(100vh - 60px);
+  min-height: calc(100vh - 300px);
+  // height 850px
   .el-menu
     background-color rgba(0,0,0, .0)
   >.el-aside

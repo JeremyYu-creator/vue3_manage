@@ -7,55 +7,56 @@
 <script>
 import { defineComponent, onMounted, ref } from "vue";
 import { Chart } from "@antv/g2";
-import userData from "@/api/getUserData";
+import { userData } from "@/api/getUserData";
 export default defineComponent({
   name: "demoLine",
   setup() {
-    const data = [
-      {
-        year: "1991",
-        value: 3,
-      },
-      {
-        year: "1992",
-        value: 4,
-      },
-      {
-        year: "1993",
-        value: 3.5,
-      },
-      {
-        year: "1994",
-        value: 5,
-      },
-      {
-        year: "1995",
-        value: 4.9,
-      },
-      {
-        year: "1996",
-        value: 6,
-      },
-      {
-        year: "1997",
-        value: 7,
-      },
-      {
-        year: "1998",
-        value: 9,
-      },
-      {
-        year: "1999",
-        value: 13,
-      },
-    ];
-    let cityData = ref([]);
+    // const data = [
+    //   {
+    //     year: "1991",
+    //     value: 3,
+    //   },
+    //   {
+    //     year: "1992",
+    //     value: 4,
+    //   },
+    //   {
+    //     year: "1993",
+    //     value: 3.5,
+    //   },
+    //   {
+    //     year: "1994",
+    //     value: 5,
+    //   },
+    //   {
+    //     year: "1995",
+    //     value: 4.9,
+    //   },
+    //   {
+    //     year: "1996",
+    //     value: 6,
+    //   },
+    //   {
+    //     year: "1997",
+    //     value: 7,
+    //   },
+    //   {
+    //     year: "1998",
+    //     value: 9,
+    //   },
+    //   {
+    //     year: "1999",
+    //     value: 13,
+    //   },
+    // ];
+    const cityData = ref([]);
     const getUserInfo = () => {
       const params = {
         startTime: 123,
       };
-      userData.getUserData(params).then((res) => {
-        cityData.value = res.object;
+      userData(params).then((res) => {
+        console.log(res)
+        cityData.value = res.data.object;
         const chart = new Chart({
           container: "map",
           // forceFit: true,

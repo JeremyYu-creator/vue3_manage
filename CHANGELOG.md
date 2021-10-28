@@ -1,4 +1,4 @@
-# 0.1.0 (2021-10-24)
+# 0.1.0 (2021-10-28)
 
 ### 🌟 新功能
 范围|描述|commitId
@@ -8,6 +8,7 @@
  - | 增加store存储，初步试验 | [d5cd12f](https://github.com/JeremyYu-creator/vue3_try/commit/d5cd12f)
  - | 增加导航功能 | [4bc2436](https://github.com/JeremyYu-creator/vue3_try/commit/4bc2436)
  - | 新增导航功能 | [73de3c5](https://github.com/JeremyYu-creator/vue3_try/commit/73de3c5)
+ - | 钻取地图完成 | [08daff5](https://github.com/JeremyYu-creator/vue3_try/commit/08daff5)
 
 
 范围|描述|commitId
