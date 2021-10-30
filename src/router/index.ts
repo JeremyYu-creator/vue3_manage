@@ -82,6 +82,11 @@ const routes: Array<RouteRecordRaw> = [
         component: () => import("../views/secondDirec/news.vue"),
       },
       {
+        path: "/latestMovie",
+        name: "LatestMovie",
+        component: () => import("../views/secondDirec/latestMovie.vue"),
+      },
+      {
         path: "/404",
         name: "404",
         component: () => import("../views/secondDirec/error.vue"),

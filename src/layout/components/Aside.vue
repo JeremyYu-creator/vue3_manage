@@ -36,6 +36,7 @@
         <el-menu-item index="2-1" @click="toRoute(messageArr.MapShow)">查看地图</el-menu-item>
         <el-menu-item index="2-2" @click="toRoute(messageArr.Draw)">绘画图形</el-menu-item>
         <el-menu-item index="2-3" @click="toRoute(messageArr.News)">查看新闻</el-menu-item>
+        <el-menu-item index="2-4" @click="toRoute(messageArr.LatestMovie)">查看近期热门电影</el-menu-item>
       </el-sub-menu>
       <el-menu-item index="3" disabled>
         <i class="el-icon-document"></i>
@@ -78,6 +79,7 @@ export default {
       ToFly: "ToFly",
       Draw: "Draw",
       News: "News",
+      LatestMovie: 'LatestMovie',
     };
     const toRoute = (name: string) => {
       router.push({ name: name });

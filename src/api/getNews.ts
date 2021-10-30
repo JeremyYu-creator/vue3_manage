@@ -2,6 +2,7 @@
 import { get } from "@/service/interceptor";
 import { backNews } from "@/type/news";
 import { entEntNews } from "@/type/entNew";
+import { backLatestMovie } from "@/type/latestMovie";
 export const getNews = (params: { page: number; col?: number }) => {
   // 获取全部新闻
   return get<backNews>(
@@ -11,19 +12,36 @@ export const getNews = (params: { page: number; col?: number }) => {
     true
   );
 };
-export const getEntNews = (params: { page: number; show_num: number, ch: string }) => {
+export const getEntNews = (params: {
+  page: number;
+  show_num: number;
+  ch: string;
+}) => {
   // 获取娱乐新闻，注意这里的count有问题，可能是没理解也可能计算错误
   return get<entEntNews>("/ent/feed.d.json", { params }, 0, true);
 };
 
-export const getSportNews = (params: { page: number; show_num: number, ch: string }) => {
+export const getSportNews = (params: {
+  page: number;
+  show_num: number;
+  ch: string;
+}) => {
   // 获取体育新闻
   return get<entEntNews>("/ent/feed.d.json", { params }, 0, true);
 };
 
-export const getTechonologyNews = (params: { page: number; show_num: number, ch: string }) => {
+export const getTechonologyNews = (params: {
+  page: number;
+  show_num: number;
+  ch: string;
+}) => {
   // 获取科技新闻
   return get<entEntNews>("/ent/feed.d.json", { params }, 0, true);
+};
+
+export const getLatestMovies = (params: { apikey: string }) => {
+  // 获取豆瓣最新电影信息
+  return get<backLatestMovie>("/v2/movie/new_movies", { params }, 0, true);
 };
 // 参数：
 // col表示新闻类别
@@ -56,4 +74,5 @@ export const getTechonologyNews = (params: { page: number; show_num: number, ch:
 // col：分类
 // show_num
 // page
+// http://api.douban.com/v2/movie/new_movies?apikey=0df993c66c0c636e29ecbb5344252a4a
 export default getNews;

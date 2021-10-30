@@ -58,6 +58,16 @@ module.exports = {
         changeOrigin: true,
         ws: true,
       },
+      '/v2': {
+        target: 'http://api.douban.com',
+        changeOrigin: true,
+        ws: true,
+      },
+      '/view': {
+        target: 'http://img9.doubanio.com',
+        changeOrigin: true,
+        ws: true,
+      },
     }
   }
 }

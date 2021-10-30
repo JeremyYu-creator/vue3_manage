@@ -21,7 +21,7 @@
       </div>
     </div>
     <div class="table-style">
-      <el-table :data="tableData" border style="width: 100%" height="550">
+      <el-table :data="tableData" border style="width: 100%" height="550" v-loading="loading">
         <template v-for="(item, index) in tableHeader" :key="index">
           <el-table-column
             :label="item.name"
@@ -161,12 +161,15 @@ export default defineComponent({
     const goTo = (address: string) => {
       window.open(address);
     };
+    const loading = ref(false,)
     const getNewsInfo = () => {
+      loading.value = true
       const params = { page: page.value, col: Number(col.value) };
       getNews(params).then((res) => {
         // console.log(res.data.result.data.list);
         tableData.value = res.data.result.data.list;
         totalCount.value = res.data.result.data.total;
+        loading.value = false
       });
     };
     const col = ref("");
@@ -190,6 +193,7 @@ export default defineComponent({
       handleSizeChange,
       col,
       getNewsInfo,
+      loading,
     };
   },
 });
