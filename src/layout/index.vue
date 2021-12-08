@@ -19,6 +19,7 @@
 <script lang="ts">
 import Aside from "./components/Aside.vue";
 import Header from "./components/Header.vue";
+// import {ref} from 'vue'
 
 export default {
   name: "index",
@@ -26,6 +27,12 @@ export default {
     Aside,
     Header,
   },
+  setup() {
+    // const tag =ref(false)
+    // return {
+    //   tag
+    // }
+  }
 };
 </script>
 
@@ -38,7 +45,7 @@ export default {
 
 .el-header {
   padding: 0 40px 0 30px;
-  height 20px
+  height 60px
 }
 
 .el-container

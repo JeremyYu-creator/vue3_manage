@@ -8,7 +8,42 @@ const routes: Array<RouteRecordRaw> = [
     children: [
       {
         path: "/",
-        redirect: "/About",
+        redirect: "/DefaultPage",
+      },
+      {
+        path: "/aboutUs",
+        name: "AboutUs",
+        component: () =>
+          import(
+            /* webpackChunkName: "about" */ "../layout/components/AboutUs.vue"
+          ),
+      },
+      {
+        path: "/more",
+        name: "More",
+        component: () =>
+          import(
+            /* webpackChunkName: "about" */ "../layout/components/More.vue"
+          ),
+      },
+      {
+        path: "/settings",
+        name: "Settings",
+        component: () =>
+          import(
+            /* webpackChunkName: "about" */ "../layout/components/Settings.vue"
+          ),
+      },
+      {
+        path: "/defaultPage",
+        name: "DefaultPage",
+        // route level code-splitting
+        // this generates a separate chunk (about.[hash].js) for this route
+        // which is lazy-loaded when the route is visited.
+        component: () =>
+          import(
+            /* webpackChunkName: "about" */ "../views/mainDirec/DefaultPage.vue"
+          ),
       },
       {
         path: "/about",
@@ -80,6 +115,32 @@ const routes: Array<RouteRecordRaw> = [
         path: "/news",
         name: "News",
         component: () => import("../views/secondDirec/news.vue"),
+        children: [
+          {
+            path: "/technologyNews",
+            name: "TechnologyNews",
+            component: () =>
+              import("../views/secondDirec/newsView/technologyNews.vue"),
+          },
+          {
+            path: "/entNews",
+            name: "EntNews",
+            component: () =>
+              import("../views/secondDirec/newsView/entNews.vue"),
+          },
+          {
+            path: "/chinaNews",
+            name: "ChinaNews",
+            component: () =>
+              import("../views/secondDirec/newsView/chinaNews.vue"),
+          },
+          {
+            path: "/sportNews",
+            name: "SportNews",
+            component: () =>
+              import("../views/secondDirec/newsView/sportNews.vue"),
+          },
+        ],
       },
       {
         path: "/latestMovie",
@@ -97,11 +158,35 @@ const routes: Array<RouteRecordRaw> = [
       },
     ],
   },
+  {
+    path: "/login",
+    name: "Login",
+    component: () =>
+      import(/* webpackChunkName: "about" */ "../components/Login.vue"),
+  },
 ];
 
 const router = createRouter({
   history: createWebHistory(process.env.BASE_URL),
   routes,
+});
+
+const getUserInfo = () => {
+  console.log("1111");
+};
+router.beforeEach(async (to) => {
+  console.log(to.name);
+  if (to.name === "Login") {
+    return true;
+  }
+  try {
+    // 从服务端处获取到token，进行相关的接口请求，以及判断相关的账户是否注册、密码是否正确
+    await getUserInfo();
+    return true;
+  } catch (error) {
+    console.log(error);
+    return "/login";
+  }
 });
 
 export default router;

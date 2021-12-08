@@ -7,10 +7,13 @@ import ElementPlus from "element-plus";
 // import 'element-plus/lib/theme-chalk/index.css'
 import "element-plus/dist/index.css";
 import locale from "element-plus/lib/locale/lang/zh-cn";
+// import LunarFullCalendar from "vue-lunar-full-calendar";
+
 
 createApp(App)
   .use(store, key)
   .use(router)
   .use(ElementPlus, { locale })
+  // .use(LunarFullCalendar)
   .mount("#app");
 // createApp(App).use(ElementPlus, { locale }).mount("#app");

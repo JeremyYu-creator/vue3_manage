@@ -64,7 +64,7 @@ export default {
   setup() {
     const index = ref(0);
     const label = ref(false);
-    const isCollapse = ref(true);
+    const isCollapse = ref(false);
     const handleOpen = function (key: any, keyPath: any) {
       console.log(key, keyPath);
     };
@@ -99,7 +99,7 @@ export default {
 
 <style lang="stylus" scoped>
 .aside-menu
-  width 300px
+  width 200px
   margin-top 20px
 .router-style
   margin-left 200px

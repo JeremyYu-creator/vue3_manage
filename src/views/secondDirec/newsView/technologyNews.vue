@@ -51,7 +51,7 @@
 import { ref, defineComponent } from "vue";
 import { getTechonologyNews } from "@/api/getNews";
 export default defineComponent({
-  name: "entNews",
+  name: "TechnologyNews",
   data() {
     return {
       tableHeader: [

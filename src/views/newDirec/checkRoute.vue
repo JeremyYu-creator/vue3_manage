@@ -14,7 +14,7 @@
     <!--    </el-tabs>-->
     <!--  </div>-->
     <div class="titleAll">
-      <div v-for="item in editNames">
+      <div v-for="item in editNames" :key="item.value">
         <div
           @click="goTo(item.name)"
           :class="[item.isActive ? 'title-item-active' : 'title-item']"
@@ -97,14 +97,14 @@ export default defineComponent({
         // console.log(detail)
       });
     };
-    const mapLabels = ['', "DemoBar", "DemoLine", "DemoMap", "DemoPie"]
+    const mapLabels = ["", "DemoBar", "DemoLine", "DemoMap", "DemoPie"];
     const goTo = (index: number) => {
       // activeName.value = "2"
       editNames.forEach((item: Record<string, unknown>) => {
-        item.isActive = item.name === index ? true : false
-      })
-      activeName.value = String(index)
-      router.push({name: mapLabels[index]})
+        item.isActive = item.name === index ? true : false;
+      });
+      activeName.value = String(index);
+      router.push({ name: mapLabels[index] });
       // if (index === 1) {
       //   router.push({ name: "DemoBar" });
       //   activeName.value = "1";

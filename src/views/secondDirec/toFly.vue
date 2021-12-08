@@ -49,7 +49,7 @@ export default {
 .wscn-http404-container {
   transform: translate(-50%, -50%);
   position: absolute;
-  top: 40%;
+  top: 50%;
   left: 60%;
 }
 .wscn-http404 {

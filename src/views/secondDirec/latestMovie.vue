@@ -145,7 +145,6 @@ export default defineComponent({
     const drawerShow = ref(false);
     const movieNewData: any = ref([]);
     const getNewsInfo = (index: number) => {
-      // loading.value = true;
       headerLoading.value = true;
       const params = { apikey: "0df993c66c0c636e29ecbb5344252a4a" };
       getLatestMovies(params).then((res) => {

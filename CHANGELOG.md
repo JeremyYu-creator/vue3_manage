@@ -1,4 +1,4 @@
-# 0.1.0 (2021-10-30)
+# 0.1.0 (2021-12-08)
 
 ### 🌟 新功能
 范围|描述|commitId
@@ -9,6 +9,7 @@
  - | 增加导航功能 | [4bc2436](https://github.com/JeremyYu-creator/vue3_try/commit/4bc2436)
  - | 新增导航功能 | [73de3c5](https://github.com/JeremyYu-creator/vue3_try/commit/73de3c5)
  - | 新增新闻查询，修改请求方式方法 | [52c997b](https://github.com/JeremyYu-creator/vue3_try/commit/52c997b)
+ - | 新增查看最新豆瓣电影信息功能 | [fc0cc4a](https://github.com/JeremyYu-creator/vue3_try/commit/fc0cc4a)
  - | 钻取地图完成 | [08daff5](https://github.com/JeremyYu-creator/vue3_try/commit/08daff5)
 
 
