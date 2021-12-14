@@ -36,6 +36,29 @@
         v-loading="loading"
         >显示设定路线框</el-button
       >
+<!--      <div>-->
+<!--        <div class="mockSearch">-->
+<!--          <span class="mock-title" @click="searchMockPlace">模糊查找(最多展示10条，请尽量输入准确)</span>-->
+<!--&lt;!&ndash;          <el-input v-model="searchValue" @input="searchMockPlace" id="mockInput"/>&ndash;&gt;-->
+<!--          <div class="select-style">-->
+<!--            <el-select-->
+<!--              v-model="searchValue"-->
+<!--              filterable-->
+<!--              remote-->
+<!--              clearable-->
+<!--              reserve-keyword-->
+<!--              placeholder="请输入关键词"-->
+<!--              :remote-method="searchMockPlace"-->
+<!--              :loading="mockDataSearchLoading">-->
+<!--              <el-option-->
+<!--                v-for="item in options"-->
+<!--                :key="item.value"-->
+<!--                :label="item.name"-->
+<!--                :value="item.name"></el-option>-->
+<!--            </el-select>-->
+<!--          </div>-->
+<!--        </div>-->
+<!--      </div>-->
     </div>
     <div id="map" style="width: 100%; height: 98%"></div>
     <div v-loading="loading" class="loading-style" v-if="tag">
@@ -111,8 +134,24 @@
       </div>
       <div class="block-place">
         <div class="input-place">
-          <el-input v-model="aimPlace" id="tipinput"></el-input>
+<!--          <el-input v-model="aimPlace" id="tipinput"></el-input>-->
+          <el-select
+            v-model="aimPlace"
+            filterable
+            remote
+            clearable
+            reserve-keyword
+            placeholder="请输入关键词"
+            :remote-method="searchMockPlace"
+            :loading="mockDataSearchLoading">
+            <el-option
+              v-for="item in options"
+              :key="item.value"
+              :label="item.name"
+              :value="item.name"></el-option>
+          </el-select>
         </div>
+
         <el-button @click="searchPlace" type="primary" plain>搜索</el-button>
       </div>
     </div>
@@ -165,10 +204,10 @@
         </el-tabs>
       </el-card>
     </div>
-    <div id="panel">
-      <!--      <template>-->
-      <!--       <i class=""></i>-->
-      <!--      </template>-->
+    <div>
+      <el-card v-loading="mapDataLoading">
+        <div id="panel"></div>
+      </el-card>
     </div>
   </div>
 </template>
@@ -183,93 +222,101 @@ import { useStore } from "@/store";
 export default {
   name: "mapShow",
   setup() {
-    onBeforeMount(() => {
-      AMapLoader.load({
-        key: "41417da0b45d919952ca225160450a43", // 申请好的Web端开发者Key，首次调用 load 时必填
-        version: "1.4.15", // 指定要加载的 JSAPI 的版本，缺省时默认为 1.4.15
-        plugins: [
-          "AMap.Weather",
-          "AMap.ToolBar",
-          "AMap.PlaceSearch",
-          "AMap.Marker",
-          "AMap.Geolocation",
-          // "AMap.IndoorMap",
-        ], // 需要使用的的插件列表，如比例尺'AMap.Scale'等
-        AMapUI: {
-          // 是否加载 AMapUI，缺省不加载
-          version: "1.1", // AMapUI 缺省 1.1
-          plugins: [], // 需要加载的 AMapUI ui插件
-        },
-        Loca: {
-          // 是否加载 Loca， 缺省不加载
-          version: "1.3.2", // Loca 版本，缺省 1.3.2
-        },
-      })
-        .then((AMap) => {
-          const map = new AMap.Map("map", {
-            zoom: 15, //级别
-            // center: [116.4929, 39.942], //中心点坐标: 这里可以写成动态获取坐标吗？小程序方面需要获取用户允许才可以拿到位置
-            viewMode: "3D", //使用3D视图
-            // showIndoorMap:false, // 隐藏地图自带的室内地图图层
-          });
-          // const indoorMap = new AMap.IndoorMap(alwaysShow: true)
-
-          const geolocation = new AMap.Geolocation({
-            enableHighAccuracy: true,
-            timeout: 10000,
-            buttonOffset: new AMap.Pixel(10, 20), //定位按钮与设置的停靠位置的偏移量，默认：Pixel(10, 20)
-            zoomToAccuracy: true,
-          });
-          map.addControl(geolocation);
-          geolocation.getCurrentPosition(function (status: any, result: any) {
-            if (status == "complete") {
-              console.log(result);
-              console.log(result.position.lng, result.position.lat); // 可以拿到坐标
-            } else {
-              console.log(result);
-            }
-          });
-          const tool = new AMap.ToolBar();
-          map.addControl(tool);
-          const trafficLayer = new AMap.TileLayer.Traffic({
-            // 显示当前路段的交通情况
-            zIndex: 10,
-          });
-          map.add(trafficLayer); //添加图层到地图
-          // AMap.plugins("AMap.Weather", function() {
-          const weather = new AMap.Weather();
-          weather.getLive("北京市", function (err: any, data: any) {
-            // 获取该城市的当前天气情况
-            console.log(err, data);
-            getInfo.value = data;
-            store.commit("getWeatherInfo", {
-              data: getInfo.value,
-            });
-            console.log(store.state, 1)
-            loading.value = false;
-            console.log(getInfo.value);
-          });
-          weather.getForecast("北京市", function (err: any, data: any) {
-            // 获取该城市未来的天气状况
-            console.log(err, data);
-            forecastArr.value = data.forecasts;
-            updateTime.value = data.reportTime;
-            futureLoading.value = false;
-          });
-        })
-        .catch((e) => {
-          console.log(e);
+    const load: any = ref(null); // 创建一个全局的地图实例，方便加入各种plugins，无需多次声明
+    const map: any = ref(null);
+    const changeDirveTag: any = ref(null);
+    const mapDataLoading = ref(true);
+    onBeforeMount(async () => {
+      try {
+        load.value = await AMapLoader.load({
+          key: "41417da0b45d919952ca225160450a43", // 申请好的Web端开发者Key，首次调用 load 时必填
+          version: "1.4.15", // 指定要加载的 JSAPI 的版本，缺省时默认为 1.4.15
+          plugins: [
+            // 一次性在最开始全部加载
+            "AMap.Weather",
+            "AMap.ToolBar",
+            "AMap.PlaceSearch",
+            "AMap.Marker",
+            "AMap.Geolocation",
+            "AMap.Autocomplete",
+            "AMap.Driving",
+            "AMap.DragRoute",
+            "AMap.Geocoder",
+            "AMap.Transfer",
+            "AMap.Riding",
+            // "AMap.IndoorMap",
+          ], // 需要使用的的插件列表，如比例尺'AMap.Scale'等
+          AMapUI: {
+            // 是否加载 AMapUI，缺省不加载
+            version: "1.1", // AMapUI 缺省 1.1
+            plugins: [], // 需要加载的 AMapUI ui插件
+          },
+          Loca: {
+            // 是否加载 Loca， 缺省不加载
+            version: "1.3.2", // Loca 版本，缺省 1.3.2
+          },
         });
+        map.value = new load.value.Map("map", {
+          zoom: 15, //级别
+          center: [116.4929, 39.942], //中心点坐标: 这里可以写成动态获取坐标吗？小程序方面需要获取用户允许才可以拿到位置
+          viewMode: "3D", //使用3D视图
+          // showIndoorMap:false, // 隐藏地图自带的室内地图图层
+        });
+        const geolocation = new load.value.Geolocation({
+          enableHighAccuracy: true,
+          timeout: 10000,
+          buttonOffset: new load.value.Pixel(10, 20), //定位按钮与设置的停靠位置的偏移量，默认：Pixel(10, 20)
+          zoomToAccuracy: true,
+        });
+        const trafficLayer = new load.value.TileLayer.Traffic({
+          // 显示当前路段的交通情况
+          zIndex: 10,
+        });
+        map.value.add(trafficLayer);
+        map.value.addControl(geolocation);
+        geolocation.getCurrentPosition((status: string, result: any) => {
+          if (status == "complete") {
+            console.log(result);
+            console.log(result.position.lng, result.position.lat); // 可以拿到坐标
+          } else {
+            console.log(result);
+          }
+        });
+        const weather = new load.value.Weather();
+        weather.getLive("北京市", function (err: any, data: any) {
+          // 默认是北京市，可以后续考虑根据当前定位在哪儿显示当前城市的地图和天气
+          // 获取该城市的当前天气情况
+          console.log(err, data);
+          getInfo.value = data;
+          store.commit("getWeatherInfo", {
+            data: getInfo.value,
+          });
+          // console.log(store.state, 1);
+          loading.value = false;
+          // console.log(getInfo.value);
+        });
+        weather.getForecast("北京市", function (err: any, data: any) {
+          // 获取该城市未来的天气状况
+          console.log(err, data);
+          forecastArr.value = data.forecasts;
+          updateTime.value = data.reportTime;
+          futureLoading.value = false;
+          mapDataLoading.value = false;
+        });
+      } catch (e) {
+        futureLoading.value = false;
+        throw new Error(e);
+      }
     });
-    let getInfo = ref({}); // 获取当前城市当天天气信息
-    let loading = ref(true); // 第一个模块的loading
-    let tag = ref(false); // 第一个模块的隐藏
-    let forecastArr = ref([]); // 第二个模块的渲染数组
-    let futureLoading = ref(true); // 第二个模块的loading
-    let updateTime = ref("");
-    let nowTag = ref(true);
-    let futureTag = ref(true);
-    let cityName = ref("");
+    const getInfo = ref({}); // 获取当前城市当天天气信息
+    const loading = ref(true); // 第一个模块的loading
+    const tag = ref(false); // 第一个模块的隐藏
+    const forecastArr = ref([]); // 第二个模块的渲染数组
+    const futureLoading = ref(true); // 第二个模块的loading
+    const updateTime = ref("");
+    const nowTag = ref(true);
+    const futureTag = ref(true);
+    const cityName = ref("");
     const store = useStore();
     const mapLabels = reactive([
       "",
@@ -282,7 +329,7 @@ export default {
       "星期日",
     ]);
     const show = ref(true);
-    let tagFuture = ref(false);
+    const tagFuture = ref(false);
     const closeWeather = (index: number) => {
       // 关闭选择页(可以考虑优化下)
       if (index === 1) {
@@ -321,144 +368,64 @@ export default {
         drivingTag.value = true;
       }
     };
-    let tagSearchCity = ref(false);
-    let searchCityTag = ref(true);
-    let placeTag = ref(false);
-    let tagPlace = ref(true);
+    const tagSearchCity = ref(false);
+    const searchCityTag = ref(true);
+    const placeTag = ref(false);
+    const tagPlace = ref(true);
     const jumpTo = () => {
-      AMapLoader.load({
-        key: "41417da0b45d919952ca225160450a43", // 申请好的Web端开发者Key，首次调用 load 时必填
-        version: "1.4.15", // 指定要加载的 JSAPI 的版本，缺省时默认为 1.4.15
-        plugins: [
-          "AMap.Weather",
-          "AMap.ToolBar",
-          "AMap.PlaceSearch",
-          "AMap.Marker",
-        ], // 需要使用的的插件列表，如比例尺'AMap.Scale'等
-        AMapUI: {
-          // 是否加载 AMapUI，缺省不加载
-          version: "1.1", // AMapUI 缺省 1.1
-          plugins: [], // 需要加载的 AMapUI ui插件
-        },
-        Loca: {
-          // 是否加载 Loca， 缺省不加载
-          version: "1.3.2", // Loca 版本，缺省 1.3.2
-        },
-      })
-        .then((AMap) => {
-          const map = new AMap.Map("map", {
-            zoom: 15, //级别
-            center: [116.4929, 39.942], //中心点坐标: 这里可以写成动态获取坐标吗？小程序方面需要获取用户允许才可以拿到位置
-            // 上海市区经纬度:(121.43333,34.50000)
-            viewMode: "3D", //使用3D视图
-          });
-          const tool = new AMap.ToolBar();
-          map.addControl(tool);
-          const trafficLayer = new AMap.TileLayer.Traffic({
-            // 显示当前路段的交通情况
-            zIndex: 10,
-          });
-          map.add(trafficLayer); //添加图层到地图
-          // AMap.plugins("AMap.Weather", function()
-          const weather = new AMap.Weather();
-          weather.getLive(cityName.value, function (err: any, data: any) {
-            // 获取该城市的当前天气情况
-            console.log(err, data);
-            getInfo.value = data;
-            loading.value = false;
-            // console.log(getInfo.value);
-          });
-          weather.getForecast(cityName.value, function (err: any, data: any) {
-            // 获取该城市未来的天气状况
-            console.log(err, data);
-            forecastArr.value = data.forecasts;
-            updateTime.value = data.reportTime;
-            futureLoading.value = false;
-          });
-          if (!cityName.value) {
-            cityName.value = "北京市";
-          }
-          map.setCity(cityName.value);
-          ElMessage.success(`已跳转到${cityName.value}`);
-        })
-        .catch((e) => {
-          console.log(e);
-        });
+      const weather = new load.value.Weather(); // 有必要进行一个新的实例创建吗？
+      weather.getLive(cityName.value, function (err: any, data: any) {
+        // 获取该城市的当前天气情况
+        console.log(err, data);
+        getInfo.value = data;
+        loading.value = false;
+        // console.log(getInfo.value);
+      });
+      weather.getForecast(cityName.value, function (err: any, data: any) {
+        // 获取该城市未来的天气状况
+        console.log(err, data);
+        forecastArr.value = data.forecasts;
+        updateTime.value = data.reportTime;
+        futureLoading.value = false;
+      });
+      if (!cityName.value) {
+        cityName.value = "北京市";
+      }
+      map.value.setCity(cityName.value);
+      ElMessage.success(`已跳转到${cityName.value}`);
     };
     const searchPlace = () => {
-      AMapLoader.load({
-        key: "41417da0b45d919952ca225160450a43", // 申请好的Web端开发者Key，首次调用 load 时必填
-        version: "1.4.15", // 指定要加载的 JSAPI 的版本，缺省时默认为 1.4.15
-        plugins: [
-          "AMap.Weather",
-          "AMap.ToolBar",
-          "AMap.PlaceSearch",
-          "AMap.Marker",
-          "AMap.Autocomplete",
-          // "AMap.infoWindow",
-        ], // 需要使用的的插件列表，如比例尺'AMap.Scale'等
-        AMapUI: {
-          // 是否加载 AMapUI，缺省不加载
-          version: "1.1", // AMapUI 缺省 1.1
-          plugins: [], // 需要加载的 AMapUI ui插件
-        },
-        Loca: {
-          // 是否加载 Loca， 缺省不加载
-          version: "1.3.2", // Loca 版本，缺省 1.3.2
-        },
-      })
-        .then((AMap) => {
-          const map = new AMap.Map("map", {
-            zoom: 15, //级别
-            center: [116.4929, 39.942], //中心点坐标: 这里可以写成动态获取坐标吗？小程序方面需要获取用户允许才可以拿到位置
-            // 上海市区经纬度:(121.43333,34.50000)
-            viewMode: "3D", //使用3D视图
+      const placeSearch = new load.value.PlaceSearch({
+        map: map.value,
+        city: cityName.value,
+        citylimit: false, //是否强制限制在设置的城市内搜索
+        pageSize: 20, // 每页限制多少条数(目前是这样：返回数据只能是1页，但是1页里的条数可以设置)
+        extensions: "base", //返回基本地址信息
+      });
+      placeSearch.search(aimPlace.value, function (status: any, result: any) {
+        // console.log(aimPlace.value)
+        console.log(result);
+        const pois = result.poiList.pois;
+        for (let i = 0; i < pois.length; i++) {
+          const poi = pois[i];
+          const marker = [];
+          marker[i] = new load.value.Marker({
+            position: poi.location,
+            title: poi.name,
           });
-          const tool = new AMap.ToolBar();
-          map.addControl(tool);
-          const trafficLayer = new AMap.TileLayer.Traffic({
-            // 显示当前路段的交通情况
-            zIndex: 10,
-          });
-          map.add(trafficLayer); //添加图层到地图
-          const placeSearch = new AMap.PlaceSearch({
-            map: map,
-            city: cityName.value,
-            citylimit: false, //是否强制限制在设置的城市内搜索
-            pageSize: 20, // 每页限制多少条数(目前是这样：返回数据只能是1页，但是1页里的条数可以设置)
-            extensions: "base", //返回基本地址信息
-          });
-
-          placeSearch.search(
-            aimPlace.value,
-            function (status: any, result: any) {
-              // console.log(aimPlace.value)
-              console.log(result);
-              const pois = result.poiList.pois;
-              for (let i = 0; i < pois.length; i++) {
-                const poi = pois[i];
-                const marker = [];
-                marker[i] = new AMap.Marker({
-                  position: poi.location,
-                  title: poi.name,
-                });
-                map.add(marker[i]);
-              }
-              map.setFitView();
-            }
-          );
-        })
-        .catch((e) => {
-          console.log(e);
-        });
+          map.value.add(marker[i]);
+        }
+        map.value.setFitView();
+      });
     };
-    let ruleForm = ref({
+    const ruleForm = ref({
       // 启用表单限制输入
       provinceValue: "",
       wantPlaceStartValue: "",
       wantPlaceEndValue: "",
     });
-    let rules = reactive({
+    const rules = reactive({
+      // 定义表单规则
       provinceValue: [
         { required: true, message: "请输入所在省份", trigger: "blur" },
       ],
@@ -469,7 +436,7 @@ export default {
         { required: true, message: "请输入目标地点", trigger: "blur" },
       ],
     });
-    const divRef = ref(null);
+    const divRef = ref(null); // 关于vue3的相关表单验证方法：因为无法使用$ref去获取dom结点，故使用这种方式可以拿到
     const submitForm = (index: string) => {
       // 验证提交表单
       (divRef.value as any).validate((valid: any) => {
@@ -502,145 +469,125 @@ export default {
     let searchDriving = ref(true);
     let drivingTag = ref(false);
     const routeDrive = (index: string) => {
-      AMapLoader.load({
-        key: "41417da0b45d919952ca225160450a43", // 申请好的Web端开发者Key，首次调用 load 时必填
-        version: "1.4.15", // 指定要加载的 JSAPI 的版本，缺省时默认为 1.4.15
-        plugins: [
-          "AMap.Weather",
-          "AMap.ToolBar",
-          "AMap.PlaceSearch",
-          "AMap.Marker",
-          "AMap.Autocomplete",
-          "AMap.Driving",
-          "AMap.DragRoute",
-          "AMap.Geocoder",
-          "AMap.Transfer",
-          "AMap.Riding",
-        ], // 需要使用的的插件列表，如比例尺'AMap.Scale'等
-        AMapUI: {
-          // 是否加载 AMapUI，缺省不加载
-          version: "1.1", // AMapUI 缺省 1.1
-          plugins: [], // 需要加载的 AMapUI ui插件
-        },
-        Loca: {
-          // 是否加载 Loca， 缺省不加载
-          version: "1.3.2", // Loca 版本，缺省 1.3.2
-        },
-      })
-        .then((AMap) => {
-          const map = new AMap.Map("map", {
-            resizeEnable: true,
-            zoom: 20, //级别
-            center: [116.4929, 39.942], //中心点坐标: 这里可以写成动态获取坐标吗？下一步可以考虑考虑如何获取当前位置坐标，但可能和api使用有关
-            viewMode: "3D", //使用3D视图
-            zoomEnable: true,
-          });
-          // console.log(index);
-          if (index === "2") {
-            const driving = new AMap.Driving({
-              // 展示路线详情
-              map: map,
-              panel: "panel",
-            });
-            driving.search(
-              [
-                {
-                  keyword: ruleForm.value.wantPlaceStartValue,
-                  city: ruleForm.value.provinceValue,
-                },
-                {
-                  keyword: ruleForm.value.wantPlaceEndValue,
-                  city: ruleForm.value.provinceValue,
-                },
-              ],
-              function (status: any, result: any) {
-                if (status === "complete") {
-                  ElMessage.success("绘制驾车路线完成");
-                } else {
-                  ElMessage.error("获取驾车数据失败：" + result);
-                }
-              }
-            );
-          } else if (index === "1") {
-            const transOptions = reactive({
-              map: map,
-              city: ruleForm.value.provinceValue,
-              panel: "panel",
-              policy: AMap.TransferPolicy.LEAST_TIME, //乘车策略
-            });
-            const transfer = new AMap.Transfer(transOptions);
-            transfer.search(
-              [
-                {
-                  keyword: ruleForm.value.wantPlaceStartValue,
-                  city: ruleForm.value.provinceValue,
-                },
-                {
-                  keyword: ruleForm.value.wantPlaceEndValue,
-                  city: ruleForm.value.provinceValue,
-                },
-              ],
-              function (status: any, result: any) {
-                if (status === "complete") {
-                  console.log(result);
-                  ElMessage.success("绘制交通路线完成！");
-                } else {
-                  ElMessage.error("绘制失败！" + result);
-                }
-              }
-            );
-          } else if (index === "3") {
-            const riding = new AMap.Riding({
-              map: map,
-              panel: "panel",
-            });
-            riding.search(
-              [
-                {
-                  keyword: ruleForm.value.wantPlaceStartValue,
-                  city: ruleForm.value.provinceValue,
-                },
-                {
-                  keyword: ruleForm.value.wantPlaceEndValue,
-                  city: ruleForm.value.provinceValue,
-                },
-              ],
-              function (status: any, result: any) {
-                if (status === "complete") {
-                  ElMessage.success("骑行路线绘制成功!");
-                } else {
-                  ElMessage.error("该路线绘制失败！" + result);
-                }
-              }
-            );
-          }
-
-          // const geocoder = new AMap.Geocoder();
-          const tool = new AMap.ToolBar();
-          map.addControl(tool);
-          const trafficLayer = new AMap.TileLayer.Traffic({
-            // 显示当前路段的交通情况
-            zIndex: 10,
-          });
-          map.add(trafficLayer); //添加图层到地图
-          drivingTag.value = false;
-          searchDriving.value = true;
-        })
-        .catch((e) => {
-          console.log(e);
+      // 路线规划
+      if (index === "2") {
+        changeDirveTag.value = new load.value.Driving({
+          // 展示路线详情
+          map: map.value,
+          panel: "panel",
         });
+        changeDirveTag.value.search(
+          [
+            {
+              keyword: ruleForm.value.wantPlaceStartValue,
+              city: ruleForm.value.provinceValue,
+            },
+            {
+              keyword: ruleForm.value.wantPlaceEndValue,
+              city: ruleForm.value.provinceValue,
+            },
+          ],
+          function (status: any, result: any) {
+            if (status === "complete") {
+              ElMessage.success("绘制驾车路线完成");
+            } else {
+              ElMessage.error("获取驾车数据失败：" + result);
+            }
+          }
+        );
+      } else if (index === "1") {
+        const transOptions = reactive({
+          map: map.value,
+          city: ruleForm.value.provinceValue,
+          panel: "panel",
+          policy: load.value.TransferPolicy.LEAST_TIME, //乘车策略
+        });
+        changeDirveTag.value = new load.value.Transfer(transOptions);
+        changeDirveTag.value.search(
+          [
+            {
+              keyword: ruleForm.value.wantPlaceStartValue,
+              city: ruleForm.value.provinceValue,
+            },
+            {
+              keyword: ruleForm.value.wantPlaceEndValue,
+              city: ruleForm.value.provinceValue,
+            },
+          ],
+          function (status: any, result: any) {
+            if (status === "complete") {
+              console.log(result);
+              ElMessage.success("绘制交通路线完成！");
+            } else {
+              ElMessage.error("绘制失败！" + result);
+            }
+          }
+        );
+      } else if (index === "3") {
+        // console.log(changeDirveTag.value)
+        // changeDirveTag.value && changeDirveTag.value.destroy()
+        changeDirveTag.value = new load.value.Riding({
+          map: map.value,
+          panel: "panel",
+        });
+        changeDirveTag.value.search(
+          [
+            {
+              keyword: ruleForm.value.wantPlaceStartValue,
+              city: ruleForm.value.provinceValue,
+            },
+            {
+              keyword: ruleForm.value.wantPlaceEndValue,
+              city: ruleForm.value.provinceValue,
+            },
+          ],
+          function (status: any, result: any) {
+            if (status === "complete") {
+              ElMessage.success("骑行路线绘制成功!");
+            } else {
+              ElMessage.error("该路线绘制失败！" + result);
+            }
+          }
+        );
+      }
+      drivingTag.value = false;
+      searchDriving.value = true;
     };
     onMounted(() => {
-      // debugger
       show.value = !show.value;
       showData(); // 这个地方显示不出来是因为上面的函数是异步的，当onBeforeMounted执行完后，会立即执行下方的onMounted,因此只展示出Proxy
     });
-    let showData = () => {
+    const showData = () => {
       console.log(getInfo);
     };
-    let aimPlace = ref("");
+    const aimPlace = ref("");
+    const searchValue = ref("");
+    const mockDataSearchLoading = ref(false)
+    const options:any = ref([])
+    const searchMockPlace = (query: string) => { // 进行相关的数据获取
+      if (query !== '') {
+        mockDataSearchLoading.value = true
+        setTimeout(async () => {
+          mockDataSearchLoading.value = false
+          const autoOptions = {
+            city: '全国'
+          }
+          const auto = new load.value.Autocomplete(autoOptions);
+          await auto.search(query, (status: any, result: any) => {
+            options.value = result
+            console.log(options.value)
+            console.log(result)
+            options.value = result.tips.filter((item:any ) => {
+              return item.name.indexOf(query) > -1
+            })
+          })
+        }, 200)
+      } else {
+        options.value = []
+      }
+    }
+
     return {
-      // center,
       show,
       getInfo,
       showData,
@@ -671,6 +618,11 @@ export default {
       drivingTag,
       tabLabels,
       activeName,
+      mapDataLoading,
+      searchValue,
+      searchMockPlace,
+      mockDataSearchLoading,
+      options,
     };
   },
 };
@@ -678,9 +630,18 @@ export default {
 <style lang="stylus" scoped>
 .show-predict
   margin-bottom 1rem
+  display flex
+  .mockSearch
+    // width 400px
+    margin-left 20px
+    display flex
+    align-items center
+    .mock-title
+      margin-right 20px
+      font-size 14px
+    .select-style
+      width 200px
 .container
-  //display flex
-  //justify-content space-around
   width 1374px
   height 700px
   .img-style

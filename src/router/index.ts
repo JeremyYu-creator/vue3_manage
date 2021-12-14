@@ -174,7 +174,7 @@ const router = createRouter({
 const getUserInfo = () => {
   console.log("1111");
 };
-router.beforeEach(async (to) => {
+router.beforeEach(async (to) => {// 路由进入前的相关验证，这里同时要注意是否其他地方使用了一个已有路径、未经过登录验证、无token的情况下直接进入页面
   console.log(to.name);
   if (to.name === "Login") {
     return true;
